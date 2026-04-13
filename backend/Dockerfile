@@ -2,6 +2,9 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Alpine 리눅스에 Prisma 필수 패키지(OpenSSL) 설치
+RUN apk add --no-cache openssl
+
 # Package 설치
 COPY package.json package-lock.json ./
 RUN npm install
