@@ -4,7 +4,7 @@ import { Input } from '../components/common/Input';
 import { Button } from '../components/common/Button';
 import { Card } from '../components/common/Card';
 
-const API_URL = 'http://localhost:4000/api';
+const API_URL = '/api';
 
 export function Signup() {
   const navigate = useNavigate();

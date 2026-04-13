@@ -1,0 +1,31 @@
+# docker-compose.prod.yml
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: bidchal-postgres-prod
+    restart: unless-stopped
+    ports:
+      - "5433:5432" # 혹시 개발용 5432가 켜져있을 경우를 대비해 5433으로 맵핑하거나 프로덕션용으로 5432 사용 가능.
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bidchal_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bidchal_password}
+      POSTGRES_DB: ${POSTGRES_DB:-bidchal_db}
+    volumes:
+      - bidchal_pgdata_prod:/var/lib/postgresql/data
+
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: bidchal-backend-prod
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-bidchal_admin}:${POSTGRES_PASSWORD:-bidchal_password}@db:5432/${POSTGRES_DB:-bidchal_db}?schema=public
+      - JWT_SECRET=${JWT_SECRET:-production_secret_key_change_me_later}
+    depends_on:
+      - db
+
+volumes:
+  bidchal_pgdata_prod:

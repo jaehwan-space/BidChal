@@ -8,7 +8,7 @@ interface SocketState {
   disconnect: () => void;
 }
 
-const SOCKET_URL = 'http://localhost:4000'; // 개발 환경 백엔드 주소
+const SOCKET_URL = '/'; // Nginx Proxy 또는 Vite Proxy를 통과하도록 상대 경로
 
 export const useSocketStore = create<SocketState>((set, get) => ({
   socket: null,

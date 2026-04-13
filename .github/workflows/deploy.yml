@@ -1,0 +1,62 @@
+name: Deploy to Proxmox
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Frontend Dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Build Frontend
+        working-directory: ./frontend
+        run: npm run build
+
+      - name: Deploy Frontend to Proxmox Nginx
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.PROXMOX_HOST }}
+          username: ${{ secrets.PROXMOX_USERNAME }}
+          port: ${{ secrets.PROXMOX_SSH_PORT }}
+          key: ${{ secrets.PROXMOX_SSH_KEY }}
+          source: "frontend/dist/*"
+          target: "/var/www/bidchal"
+          strip_components: 2
+
+      - name: Deploy Backend via Docker Compose
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.PROXMOX_HOST }}
+          username: ${{ secrets.PROXMOX_USERNAME }}
+          port: ${{ secrets.PROXMOX_SSH_PORT }}
+          key: ${{ secrets.PROXMOX_SSH_KEY }}
+          script: |
+            # 서버 내부의 프로젝트 경로로 이동 (사용자 환경에 맞게 폴더 변경 필요)
+            cd /home/${{ secrets.PROXMOX_USERNAME }}/BidChal || mkdir -p /home/${{ secrets.PROXMOX_USERNAME }}/BidChal
+            
+            # 최신 코드 강제 동기화 (혹은 git pull 대신 SCP로 덮어쓰기 가능, 여기서는 git pull 가정)
+            # 만약 git을 세팅하지 않았다면, backend 폴더 및 docker-compose.prod.yml도 SCP로 보내야 합니다.
+            # 이 워크플로우는 서버 내부에 이미 git clone이 되어있다고 가정합니다.
+            git reset --hard origin/main
+            git pull origin main
+            
+            # 도커 빌드 & 재시작
+            docker-compose -f docker-compose.prod.yml down
+            docker-compose -f docker-compose.prod.yml up -d --build

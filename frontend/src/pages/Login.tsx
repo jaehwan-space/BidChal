@@ -6,7 +6,7 @@ import { Card } from '../components/common/Card';
 import { useAuthStore } from '../store/useAuthStore';
 
 // 임시 로컬 API URL (Vite Proxy 세팅 전)
-const API_URL = 'http://localhost:4000/api';
+const API_URL = '/api';
 
 export function Login() {
   const navigate = useNavigate();
