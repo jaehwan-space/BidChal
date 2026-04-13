@@ -6,7 +6,7 @@ const router = Router({ mergeParams: true });
 // 새 아이템 생성 (핵심 비즈니스 로직 - 경매 타입 지정)
 router.post('/', async (req, res) => {
   try {
-    const { roomId } = req.params;
+    const { roomId } = req.params as { roomId: string };
     const { name, description, startingPrice, auctionType, imageUrl } = req.body;
 
     if (!name || !startingPrice || !auctionType) {
@@ -34,7 +34,7 @@ router.post('/', async (req, res) => {
 // 방에 속한 아이템 목록 조회
 router.get('/', async (req, res) => {
   try {
-    const { roomId } = req.params;
+    const { roomId } = req.params as { roomId: string };
     const items = await prisma.item.findMany({
       where: { roomId },
       orderBy: { createdAt: 'asc' }
