@@ -3,6 +3,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { setupSockets } from './socket';
 
 dotenv.config();
 
@@ -18,13 +19,8 @@ const io = new Server(httpServer, {
   },
 });
 
-io.on('connection', (socket) => {
-  console.log(`User connected: ${socket.id}`);
-
-  socket.on('disconnect', () => {
-    console.log(`User disconnected: ${socket.id}`);
-  });
-});
+// 소켓 이벤트 분리 적용
+setupSockets(io);
 
 const PORT = process.env.PORT || 4000;
 
