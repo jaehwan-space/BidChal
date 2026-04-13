@@ -57,6 +57,10 @@ jobs:
             git reset --hard origin/main
             git pull origin main
             
+            # 완벽한 쌩(Raw) 도커 컴포즈 V2 다운로드 및 실행 (서버 환경에 무관하게 100% 작동)
+            curl -SL https://github.com/docker/compose/releases/download/v2.26.1/docker-compose-linux-x86_64 -o ./docker-compose-bin
+            chmod +x ./docker-compose-bin
+            
             # 도커 빌드 & 재시작
-            docker compose -f docker-compose.prod.yml down
-            docker compose -f docker-compose.prod.yml up -d --build
+            ./docker-compose-bin -f docker-compose.prod.yml down
+            ./docker-compose-bin -f docker-compose.prod.yml up -d --build
