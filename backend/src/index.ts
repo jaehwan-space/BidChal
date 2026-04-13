@@ -5,11 +5,20 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { setupSockets } from './socket';
 
+import roomRoutes from './routes/room';
+import itemRoutes from './routes/item';
+import userRoutes from './routes/user';
+
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// API 라우트 연동
+app.use('/api/users', userRoutes);
+app.use('/api/rooms', roomRoutes);
+app.use('/api/rooms/:roomId/items', itemRoutes);
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {

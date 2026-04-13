@@ -1,0 +1,50 @@
+import { Router } from 'express';
+import { prisma } from '../prisma';
+
+const router = Router();
+
+// 호스트가 새로운 방을 생성
+router.post('/', async (req, res) => {
+  try {
+    const { title, hostId } = req.body;
+    
+    if (!title || !hostId) {
+      return res.status(400).json({ error: 'title and hostId are required' });
+    }
+
+    const room = await prisma.room.create({
+      data: {
+        title,
+        hostId
+      }
+    });
+
+    res.status(201).json(room);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to create room' });
+  }
+});
+
+// 전체 방 목록 조회
+router.get('/', async (req, res) => {
+  try {
+    const rooms = await prisma.room.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        host: {
+          select: { username: true }
+        },
+        _count: {
+          select: { items: true }
+        }
+      }
+    });
+    res.json(rooms);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch rooms' });
+  }
+});
+
+export default router;
