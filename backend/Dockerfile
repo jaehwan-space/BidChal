@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Package 설치
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm install
 
 # Prisma Schema 복사 및 생성
 COPY prisma ./prisma
