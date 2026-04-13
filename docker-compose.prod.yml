@@ -27,5 +27,14 @@ services:
     depends_on:
       - db
 
+  db-viewer:
+    image: adminer
+    container_name: bidchal-db-viewer
+    restart: unless-stopped
+    ports:
+      - "8080:8080" # 아이패드 사파리용 접속 포트
+    depends_on:
+      - db
+
 volumes:
   bidchal_pgdata_prod:
