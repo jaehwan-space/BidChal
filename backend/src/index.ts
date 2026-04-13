@@ -8,6 +8,7 @@ import { setupSockets } from './socket';
 import roomRoutes from './routes/room';
 import itemRoutes from './routes/item';
 import userRoutes from './routes/user';
+import authRoutes from './routes/auth';
 
 dotenv.config();
 
@@ -16,6 +17,7 @@ app.use(cors());
 app.use(express.json());
 
 // API 라우트 연동
+app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/rooms/:roomId/items', itemRoutes);
