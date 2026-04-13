@@ -58,5 +58,5 @@ jobs:
             git pull origin main
             
             # 도커 빌드 & 재시작
-            docker-compose -f docker-compose.prod.yml down
-            docker-compose -f docker-compose.prod.yml up -d --build
+            docker compose -f docker-compose.prod.yml down
+            docker compose -f docker-compose.prod.yml up -d --build
