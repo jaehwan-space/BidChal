@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------------------------
+// ENUMS
+// ------------------------------------
+
+enum AuctionType {
+  OPEN // 공개 입찰 (실시간 최고가 공개)
+  BLIND // 비공개 입찰 (상대방 입찰가 비공개, 지정 시간에 최고가 낙찰)
+}
+
+enum ItemStatus {
+  PENDING // 대기 중 (경매 시작 전)
+  ACTIVE // 경매 진행 중
+  SOLD // 낙찰 완료
+  PASSED // 유찰
+}
+
+enum TransactionReason {
+  CHARGE // 포인트 충전
+  DEPOSIT // 입찰 보증금 또는 결제 비용 차감
+  REFUND // 유찰 또는 입찰 실패로 인한 환불
+  WINNING_PAY // 낙찰에 의한 최종 결제
+}
+
+// ------------------------------------
+// MODELS
+// ------------------------------------
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  points    Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  rooms        Room[]             @relation("HostRooms")
+  bids         Bid[]
+  transactions PointTransaction[]
+}
+
+model Room {
+  id        String   @id @default(uuid())
+  title     String
+  hostId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  host  User   @relation("HostRooms", fields: [hostId], references: [id])
+  items Item[]
+}
+
+model Item {
+  id            String      @id @default(uuid())
+  roomId        String
+  name          String
+  description   String?
+  imageUrl      String? // 썸네일 이미지 링크
+  startingPrice Int
+  auctionType   AuctionType // 핵심 비즈니스 로직 - 아이템별로 오픈/블라인드 설정
+  status        ItemStatus  @default(PENDING)
+  startTime     DateTime?
+  endTime       DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  room Room  @relation(fields: [roomId], references: [id])
+  bids Bid[]
+}
+
+model Bid {
+  id        String   @id @default(uuid())
+  itemId    String
+  userId    String
+  amount    Int
+  createdAt DateTime @default(now())
+
+  item Item @relation(fields: [itemId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  // 한 유저가 한 아이템에 중복 입찰은 가능하지만 블라인드인 경우 단일 입찰만 가능하도록 서비스 로직에서 제어
+}
+
+model PointTransaction {
+  id        String            @id @default(uuid())
+  userId    String
+  amount    Int // 양수면 증가, 음수면 차감
+  reason    TransactionReason
+  createdAt DateTime          @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}

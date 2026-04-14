@@ -3,6 +3,8 @@ import { Layout } from './components/layout/Layout';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { Lobby } from './pages/Lobby';
+import { Room } from './pages/Room';
+import { RoomSettings } from './pages/RoomSettings';
 import { useAuthStore } from './store/useAuthStore';
 
 import { ReactNode } from 'react';
@@ -27,6 +29,22 @@ function App() {
           element={
             <RequireAuth>
               <Lobby />
+            </RequireAuth>
+          } 
+        />
+        <Route 
+          path="/room/:id/settings" 
+          element={
+            <RequireAuth>
+              <RoomSettings />
+            </RequireAuth>
+          } 
+        />
+        <Route 
+          path="/room/:id" 
+          element={
+            <RequireAuth>
+              <Room />
             </RequireAuth>
           } 
         />
