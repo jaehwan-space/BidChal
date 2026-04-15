@@ -105,7 +105,7 @@ export function HostControl() {
     const handleUpdateBid = (data: any) => {
       setActiveItem(prev => prev ? {
         ...prev,
-        currentHighest: data.amount,
+        currentHighest: data.newAmount,
         totalBids: data.totalBids
       } : null);
       if (data.lastBidderName) {

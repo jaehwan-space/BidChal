@@ -171,7 +171,7 @@ export function Room() {
   const timerColor = remainingTime <= 5 ? 'var(--danger)' : remainingTime <= 10 ? 'var(--primary)' : 'var(--success)';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
       {/* 상단 헤더 */}
       <Card title={room.title}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -209,7 +209,7 @@ export function Room() {
         {/* ─── 경매 진행 중 ─── */}
         {phase === 'active' && activeItem && (
           <motion.div key="active" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
             
             {/* 타이머 바 (일시정지 시 오버레이 처리) */}
             <div style={{ padding: '12px 16px', background: 'var(--panel-bg)', borderRadius: 'var(--border-radius-md)', 
@@ -235,15 +235,12 @@ export function Room() {
             {/* 아이템 정보 */}
             <Card title={activeItem.name}>
               {activeItem.imageUrl && (
-                <div style={{ width: '100%', borderRadius: 'var(--border-radius-sm)', overflow: 'hidden', marginBottom: '16px' }}>
+                <div style={{ width: '100%', height: '120px', borderRadius: 'var(--border-radius-sm)', overflow: 'hidden', marginBottom: '8px' }}>
                   <img src={activeItem.imageUrl} alt={activeItem.name}
-                    style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover' }} />
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
               )}
-              {activeItem.description && (
-                <p style={{ color: 'var(--text-secondary)', margin: '0 0 12px 0', fontSize: '14px' }}>{activeItem.description}</p>
-              )}
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
                 <span style={{
                   padding: '4px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: 600,
                   background: activeItem.auctionType === 'OPEN' ? 'rgba(49,130,246,0.1)' : 'rgba(240,68,82,0.1)',
@@ -258,14 +255,14 @@ export function Room() {
 
               {/* 현재 최고가 */}
               <div style={{
-                padding: '20px', borderRadius: 'var(--border-radius-sm)',
+                padding: '12px', borderRadius: 'var(--border-radius-sm)',
                 background: 'linear-gradient(135deg, rgba(255,111,0,0.08), rgba(255,111,0,0.02))',
                 border: '1px solid rgba(255,111,0,0.2)', textAlign: 'center'
               }}>
                 <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '4px' }}>현재 최고 입찰가</div>
                 <motion.div key={activeItem.currentHighest}
                   initial={{ scale: 1.2, color: '#FF6F00' }} animate={{ scale: 1, color: 'var(--text-primary)' }}
-                  style={{ fontSize: '36px', fontWeight: 800 }}>
+                  style={{ fontSize: '28px', fontWeight: 800 }}>
                   {activeItem.auctionType === 'OPEN'
                     ? `${activeItem.currentHighest.toLocaleString()} P`
                     : '??? P'}
@@ -275,15 +272,15 @@ export function Room() {
 
             {/* 입찰 영역 */}
             <Card title="">
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div style={{ textAlign: 'right', fontSize: '14px', color: 'var(--text-secondary)' }}>
                   최소 입찰가: {(activeItem.currentHighest + 1).toLocaleString()}P
                 </div>
                 
                 <div style={{ 
-                  padding: '16px', background: 'var(--bg-color)', 
+                  padding: '12px', background: 'var(--bg-color)', 
                   border: '2px solid var(--border-color)', borderRadius: '12px',
-                  fontSize: '32px', fontWeight: 700, textAlign: 'right', minHeight: '38px',
+                  fontSize: '24px', fontWeight: 700, textAlign: 'right', minHeight: '28px',
                   color: bidString ? 'var(--text-primary)' : 'var(--text-secondary)'
                 }}>
                   {bidString ? Number(bidString).toLocaleString() + ' P' : '0 P'}

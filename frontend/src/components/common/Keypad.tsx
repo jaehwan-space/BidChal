@@ -32,7 +32,7 @@ export function Keypad({ value, onChange, onEnter, maxValue }: KeypadProps) {
   };
 
   const buttonStyle: React.CSSProperties = {
-    padding: '16px',
+    padding: '12px',
     fontSize: '20px',
     fontWeight: 700,
     background: 'var(--bg-color)',
@@ -52,7 +52,7 @@ export function Keypad({ value, onChange, onEnter, maxValue }: KeypadProps) {
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
         {keys.map(k => (
           <motion.button
