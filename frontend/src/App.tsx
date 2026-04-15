@@ -7,6 +7,7 @@ import { Room } from './pages/Room';
 import { RoomSettings } from './pages/RoomSettings';
 import { HostControl } from './pages/HostControl';
 import { DisplayView } from './pages/DisplayView';
+import { Mypage } from './pages/Mypage';
 import { useAuthStore } from './store/useAuthStore';
 
 import { ReactNode } from 'react';
@@ -68,6 +69,14 @@ function App() {
               element={
                 <RequireAuth>
                   <Room />
+                </RequireAuth>
+              } 
+            />
+            <Route 
+              path="/mypage" 
+              element={
+                <RequireAuth>
+                  <Mypage />
                 </RequireAuth>
               } 
             />

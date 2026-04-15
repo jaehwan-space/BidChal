@@ -25,6 +25,7 @@ export function Room() {
   const [totalItems, setTotalItems] = useState(0);
   const [bidAmount, setBidAmount] = useState<number>(0);
   const [soldInfo, setSoldInfo] = useState<{ winnerName: string; finalPrice: number; itemName: string } | null>(null);
+  const [maxTime, setMaxTime] = useState(30);
 
   useEffect(() => { connect(); }, [connect]);
 
@@ -49,6 +50,7 @@ export function Room() {
       setRemainingTime(data.remainingTime);
       setCurrentIndex(data.currentIndex);
       setTotalItems(data.totalItems);
+      setMaxTime(data.remainingTime);
       setPhase('active');
       setBidAmount(0);
     };
@@ -58,12 +60,14 @@ export function Room() {
       setRemainingTime(data.remainingTime);
       setCurrentIndex(data.currentIndex);
       setTotalItems(data.totalItems);
+      setMaxTime(data.remainingTime);
       setPhase('active');
       setBidAmount(0);
     };
 
     const handleTimerTick = (data: { remainingTime: number }) => {
       setRemainingTime(data.remainingTime);
+      setMaxTime(prev => Math.max(prev, data.remainingTime));
     };
 
     const handleUpdateBid = (data: any) => {
@@ -192,7 +196,7 @@ export function Room() {
                 </motion.span>
               </div>
               <div style={{ width: '100%', height: '6px', background: 'var(--border-color)', borderRadius: '3px', overflow: 'hidden' }}>
-                <motion.div animate={{ width: `${(remainingTime / (activeItem.timerDuration || 30)) * 100}%` }}
+                <motion.div animate={{ width: `${(remainingTime / maxTime) * 100}%` }}
                   style={{ height: '100%', background: timerColor, borderRadius: '3px' }} />
               </div>
             </div>

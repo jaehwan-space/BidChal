@@ -58,18 +58,26 @@ export function Lobby() {
       
       {/* Header Profile */}
       <Card title={`환영합니다, ${user?.username || '게스트'}님!`}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+          <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '14px' }}>
+            다양한 경매방에 참여해보세요.
+          </p>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Button variant="secondary" onClick={() => navigate('/mypage')} style={{ padding: '8px 12px', fontSize: '12px' }}>
+              👤 내 지갑/낙찰내역
+            </Button>
+            <Button variant="danger" onClick={handleLogout} style={{ padding: '8px 12px', fontSize: '12px' }}>
+              로그아웃
+            </Button>
+          </div>
+        </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <p style={{ color: 'var(--primary)', fontWeight: 600, fontSize: '18px', margin: 0 }}>
             {user?.points?.toLocaleString() || 0} P
           </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: 'var(--text-secondary)' }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isConnected ? 'var(--success)' : 'var(--danger)' }} />
-              {isConnected ? '온라인' : '오프라인'}
-            </div>
-            <Button variant="secondary" onClick={handleLogout} style={{ padding: '8px 16px', fontSize: '14px' }}>
-              로그아웃
-            </Button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isConnected ? 'var(--success)' : 'var(--danger)' }} />
+            {isConnected ? '온라인' : '오프라인'}
           </div>
         </div>
       </Card>
