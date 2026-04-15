@@ -12,6 +12,7 @@ interface AuthState {
   isAuthenticated: boolean;
   login: (token: string, user: User) => void;
   logout: () => void;
+  updateUser: (data: Partial<User>) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => {
@@ -34,6 +35,15 @@ export const useAuthStore = create<AuthState>((set) => {
       localStorage.removeItem('bidchal_token');
       localStorage.removeItem('bidchal_user');
       set({ token: null, user: null, isAuthenticated: false });
+    },
+    
+    updateUser: (data) => {
+      set((state) => {
+        if (!state.user) return state;
+        const updatedUser = { ...state.user, ...data };
+        localStorage.setItem('bidchal_user', JSON.stringify(updatedUser));
+        return { user: updatedUser };
+      });
     }
   };
 });

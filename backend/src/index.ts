@@ -19,7 +19,7 @@ app.use(cors());
 app.use(express.json());
 
 // 업로드된 이미지 정적 파일 서빙
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // API 라우트 연동
 app.use('/api/auth', authRoutes);
@@ -36,7 +36,8 @@ const io = new Server(httpServer, {
   },
 });
 
-// 소켓 이벤트 분리 적용
+app.set('io', io);
+
 setupSockets(io);
 
 const PORT = process.env.PORT || 4000;

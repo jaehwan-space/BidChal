@@ -14,18 +14,41 @@ import { motion } from 'framer-motion';
 
 export function Lobby() {
   const { connect, disconnect, isConnected } = useSocketStore();
-  const { user, logout } = useAuthStore();
+  const { user, token, logout, updateUser } = useAuthStore();
   const navigate = useNavigate();
   
-  const { data: rooms, isLoading, isError } = useRooms();
+  const { data: rooms, isLoading, isError, refetch: refetchRooms } = useRooms();
   const createRoomMutation = useCreateRoom();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newRoomTitle, setNewRoomTitle] = useState('');
 
+  // 포인트 실시간 동기화
+  useEffect(() => {
+    if (token) {
+      fetch('/api/users/mypage', { headers: { Authorization: `Bearer ${token}` } })
+        .then(res => res.json())
+        .then(data => {
+          if (data?.user?.points !== undefined) {
+            updateUser({ points: data.user.points });
+          }
+        })
+        .catch(() => {});
+    }
+  }, [token, updateUser]);
+
   useEffect(() => {
     connect();
+    
+    const { socket } = useSocketStore.getState();
+    if (socket) {
+      socket.on('lobby_update', () => {
+        refetchRooms();
+      });
+    }
+
     return () => {
+      if (socket) socket.off('lobby_update');
       disconnect();
     };
   }, [connect, disconnect]);
