@@ -81,14 +81,11 @@ export function Lobby() {
       
       {/* Header Profile */}
       <Card title={`환영합니다, ${user?.username || '게스트'}님!`}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
           <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '14px' }}>
             다양한 경매방에 참여해보세요.
           </p>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <Button variant="secondary" onClick={() => navigate('/mypage')} style={{ padding: '8px 12px', fontSize: '12px' }}>
-              👤 내 지갑/낙찰내역
-            </Button>
             <Button variant="danger" onClick={handleLogout} style={{ padding: '8px 12px', fontSize: '12px' }}>
               로그아웃
             </Button>
@@ -130,7 +127,7 @@ export function Lobby() {
         )}
 
         {!isLoading && !isError && rooms && rooms.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
             {rooms.map(room => (
               <RoomCard 
                 key={room.id} 
@@ -149,7 +146,7 @@ export function Lobby() {
         onClick={() => setIsModalOpen(true)}
         style={{
           position: 'fixed',
-          bottom: 'max(24px, env(safe-area-inset-bottom))',
+          bottom: 'calc(80px + env(safe-area-inset-bottom))',
           right: '24px',
           width: '56px',
           height: '56px',

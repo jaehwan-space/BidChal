@@ -3,7 +3,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 60px;
+  height: 56px;
   background-color: var(--glass-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -25,7 +25,7 @@
   color: var(--text-secondary);
   text-decoration: none;
   font-size: 11px;
-  gap: 4px;
+  gap: 2px;
   transition: color var(--transition-fast);
 }
 
@@ -36,4 +36,11 @@
 .navItem.active {
   color: var(--primary);
   font-weight: 700;
+}
+
+/* ─── Desktop: hide bottom nav, use header or sidebar nav ─── */
+@media (min-width: 1024px) {
+  .nav {
+    display: none;
+  }
 }

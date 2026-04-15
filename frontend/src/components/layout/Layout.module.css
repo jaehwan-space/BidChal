@@ -1,7 +1,7 @@
 .layout {
   display: flex;
   flex-direction: column;
-  height: 100dvh; /* Mobile browser bottom nav friendly */
+  height: 100dvh;
   overflow: hidden;
 }
 
@@ -12,13 +12,13 @@
   margin: 0 auto;
   padding: 16px;
   box-sizing: border-box;
-  overflow-y: auto; /* Pages like Lobby can scroll, Room will fill */
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
 }
 
 .header {
-  height: 60px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -34,4 +34,30 @@
   font-weight: 700;
   color: var(--primary);
   margin: 0;
+}
+
+/* ─── Tablet (768px+) ─── */
+@media (min-width: 768px) {
+  .main {
+    max-width: 720px;
+    padding: 24px;
+  }
+
+  .header {
+    max-width: 720px;
+    padding: 0 24px;
+  }
+}
+
+/* ─── Desktop (1024px+) ─── */
+@media (min-width: 1024px) {
+  .main {
+    max-width: 960px;
+    padding: 32px 40px;
+  }
+
+  .header {
+    max-width: 960px;
+    padding: 0 40px;
+  }
 }
