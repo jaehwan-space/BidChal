@@ -31,4 +31,4 @@ EXPOSE 4000
 ENV NODE_ENV=production
 
 # 시작 시 DB 스키마 동기화 후 서버 실행
-CMD ["sh", "-c", "pnpm exec prisma db push --skip-generate --accept-data-loss && pnpm run start"]
+CMD ["sh", "-c", "pnpm exec prisma db push --skip-generate --force-reset && pnpm run start"]
