@@ -6,22 +6,21 @@ import { Card } from '../components/common/Card';
 import { useAuthStore } from '../store/useAuthStore';
 import { motion } from 'framer-motion';
 
-// 임시 로컬 API URL (Vite Proxy 세팅 전)
 const API_URL = '/api';
 
 export function Login() {
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
   
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username || !password) {
-      setErrorMsg('아이디와 비밀번호를 모두 입력해주세요.');
+    if (!email || !password) {
+      setErrorMsg('이메일과 비밀번호를 모두 입력해주세요.');
       return;
     }
 
@@ -31,7 +30,7 @@ export function Login() {
       const res = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ email, password })
       });
 
       const data = await res.json();
@@ -52,10 +51,11 @@ export function Login() {
       <Card title="BidChal 로그인" subtitle="모의 경매 플랫폼에 다시 오신 것을 환영합니다.">
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <Input 
-          label="닉네임 (아이디)" 
-          value={username} 
-          onChange={(e) => { setUsername(e.target.value); setErrorMsg(''); }} 
-          placeholder="아이디를 입력하세요" 
+          label="이메일" 
+          type="email"
+          value={email} 
+          onChange={(e) => { setEmail(e.target.value); setErrorMsg(''); }} 
+          placeholder="이메일 주소를 입력하세요" 
         />
         <Input 
           label="비밀번호" 

@@ -15,7 +15,7 @@ interface WonItem {
   id: string; name: string; imageUrl: string | null; finalPrice: number; room: { title: string }; updatedAt: string;
 }
 interface MypageData {
-  user: { username: string; points: number; createdAt: string; };
+  user: { email: string; username: string; points: number; createdAt: string; };
   transactions: PointTransaction[];
   wonItems: WonItem[];
 }
@@ -123,7 +123,8 @@ export function Mypage() {
       <div style={{ padding: '16px 8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 800 }}>{data.user.username}</h2>
-          <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>가입일: {new Date(data.user.createdAt).toLocaleDateString()}</span>
+          <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{data.user.email}</span>
+          <span style={{ fontSize: '13px', color: 'var(--text-secondary)', display: 'block' }}>가입일: {new Date(data.user.createdAt).toLocaleDateString()}</span>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
           <Button variant="secondary" onClick={() => setActiveModal('profile')}>프로필 수정</Button>

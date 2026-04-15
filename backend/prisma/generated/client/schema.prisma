@@ -46,7 +46,8 @@ enum TransactionReason {
 
 model User {
   id        String   @id @default(uuid())
-  username  String   @unique
+  email     String   @unique
+  username  String
   password  String
   points    Int      @default(0)
   createdAt DateTime @default(now())

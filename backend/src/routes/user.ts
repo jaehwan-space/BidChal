@@ -26,7 +26,7 @@ router.get('/mypage', authenticate, async (req: any, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, username: true, points: true, createdAt: true },
+      select: { id: true, email: true, username: true, points: true, createdAt: true },
     });
 
     if (!user) {
@@ -104,15 +104,10 @@ router.put('/profile', authenticate, async (req: any, res) => {
   }
 
   try {
-    const existing = await prisma.user.findUnique({ where: { username } });
-    if (existing && existing.id !== userId) {
-      return res.status(400).json({ error: '이미 사용 중인 닉네임입니다.' });
-    }
-
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: { username },
-      select: { id: true, username: true, points: true }
+      select: { id: true, email: true, username: true, points: true }
     });
 
     res.json(updatedUser);
@@ -134,7 +129,7 @@ router.post('/gift', authenticate, async (req: any, res) => {
   try {
     await prisma.$transaction(async (tx) => {
       const sender = await tx.user.findUnique({ where: { id: senderId } });
-      const receiver = await tx.user.findUnique({ where: { username: targetUsername } });
+      const receiver = await tx.user.findFirst({ where: { username: targetUsername } });
 
       if (!sender || sender.points < amount) {
         throw new Error('잔액이 부족합니다.');

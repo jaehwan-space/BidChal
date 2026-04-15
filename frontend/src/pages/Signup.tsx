@@ -11,16 +11,17 @@ const API_URL = '/api';
 export function Signup() {
   const navigate = useNavigate();
   
+  const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
+  const [emailError, setEmailError] = useState('');
   const [usernameError, setUsernameError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [globalError, setGlobalError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Focus 벗어날 때 실시간 검증 (토스 스타일)
   const handleBlurPassword = () => {
     if (confirmPassword && password !== confirmPassword) {
       setPasswordError('비밀번호가 일치하지 않습니다.');
@@ -32,10 +33,12 @@ export function Signup() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setGlobalError('');
+    setEmailError('');
     setUsernameError('');
     setPasswordError('');
 
-    if (!username) { setUsernameError('아이디를 입력해주세요.'); return; }
+    if (!email) { setEmailError('이메일을 입력해주세요.'); return; }
+    if (!username) { setUsernameError('닉네임을 입력해주세요.'); return; }
     if (password.length < 4) { setPasswordError('비밀번호는 4자리 이상이어야 합니다.'); return; }
     if (password !== confirmPassword) { setPasswordError('비밀번호가 일치하지 않습니다.'); return; }
 
@@ -44,7 +47,7 @@ export function Signup() {
       const res = await fetch(`${API_URL}/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ email, username, password })
       });
 
       const data = await res.json();
@@ -65,19 +68,28 @@ export function Signup() {
       <Card title="빠른 회원가입" subtitle="10초만에 가입하고 경매에 참여해보세요.">
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <Input 
-          label="닉네임 (아이디)" 
+          label="이메일" 
+          type="email"
+          value={email} 
+          onChange={(e) => setEmail(e.target.value)} 
+          placeholder="이메일 주소를 입력하세요" 
+          error={emailError}
+          onBlur={() => !email && setEmailError('이메일을 입력해주세요.')}
+        />
+        <Input 
+          label="닉네임 (표시 이름)" 
           value={username} 
           onChange={(e) => setUsername(e.target.value)} 
-          placeholder="사용할 닉네임을 입력하세요" 
+          placeholder="경매에서 사용할 닉네임" 
           error={usernameError}
-          onBlur={() => !username && setUsernameError('아이디를 입력해주세요.')}
+          onBlur={() => !username && setUsernameError('닉네임을 입력해주세요.')}
         />
         <Input 
           label="비밀번호" 
           type="password" 
           value={password} 
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="4자리 이상 규칙" 
+          placeholder="4자리 이상" 
           onBlur={() => password && password.length < 4 && setPasswordError('비밀번호는 4자리 이상이어야 합니다.')}
         />
         <Input 
