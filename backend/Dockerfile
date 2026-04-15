@@ -5,8 +5,8 @@ WORKDIR /app
 # Alpine 리눅스에 Prisma 필수 패키지(OpenSSL) 설치
 RUN apk add --no-cache openssl
 
-# pnpm 활성화
-RUN corepack enable pnpm
+# pnpm 직접 설치 (corepack 네트워크 오류 방지)
+RUN npm install -g pnpm@10
 
 # 워크스페이스 lockfile + backend package.json 복사
 COPY pnpm-lock.yaml pnpm-workspace.yaml ./
