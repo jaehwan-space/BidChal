@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useSocketStore } from '../store/useSocketStore';
 import { Item } from '../hooks/useRooms';
 import { motion, AnimatePresence } from 'framer-motion';
+import { initAudio, playBidSound, playSoldSound, playPassedSound, playTickSound } from '../utils/sound';
 
 interface ActiveItemState {
   item: Item & { currentHighest: number; totalBids: number };
@@ -22,6 +23,12 @@ export function DisplayView() {
   const [soldInfo, setSoldInfo] = useState<{ winnerName: string; finalPrice: number; itemName: string } | null>(null);
   const [passedInfo, setPassedInfo] = useState<{ itemName: string } | null>(null);
   const [maxTime, setMaxTime] = useState(30); // 타이머 바 용 최대 시간 추적
+  const [audioReady, setAudioReady] = useState(false);
+
+  const handleDisplayClick = () => {
+    initAudio();
+    setAudioReady(true);
+  };
 
   useEffect(() => { connect(); }, [connect]);
 
@@ -68,9 +75,14 @@ export function DisplayView() {
     const handleTimerTick = (data: { remainingTime: number }) => {
       setActiveState(prev => prev ? { ...prev, remainingTime: data.remainingTime } : null);
       setMaxTime(prev => Math.max(prev, data.remainingTime));
+      
+      if (data.remainingTime <= 10 && data.remainingTime > 0) {
+        playTickSound();
+      }
     };
 
     const handleUpdateBid = (data: { itemId: string; newAmount: number; lastBidderName: string; totalBids: number }) => {
+      playBidSound();
       setActiveState(prev => {
         if (!prev || prev.item.id !== data.itemId) return prev;
         return {
@@ -81,16 +93,19 @@ export function DisplayView() {
     };
 
     const handleItemSold = (data: { itemName: string; winnerName: string; finalPrice: number }) => {
+      playSoldSound();
       setSoldInfo(data);
       setPhase('sold');
     };
 
     const handleItemPassed = (data: { itemName: string }) => {
+      playPassedSound();
       setPassedInfo(data);
       setPhase('passed');
     };
 
     const handleAuctionEnded = () => {
+      playSoldSound();
       setPhase('ended');
     };
 
@@ -125,13 +140,29 @@ export function DisplayView() {
     : '#3182F6';
 
   return (
-    <div style={{
-      width: '100vw', height: '100vh',
-      background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%)',
-      display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
-      fontFamily: "'Pretendard', -apple-system, sans-serif",
-      color: 'white', overflow: 'hidden', position: 'relative',
-    }}>
+    <div 
+      onClick={handleDisplayClick}
+      style={{
+        width: '100vw', height: '100vh',
+        background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%)',
+        display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+        fontFamily: "'Pretendard', -apple-system, sans-serif",
+        color: 'white', overflow: 'hidden', position: 'relative',
+        cursor: audioReady ? 'default' : 'pointer'
+      }}
+    >
+      {!audioReady && (
+        <motion.div
+          animate={{ scale: [1, 1.05, 1], opacity: [0.8, 1, 0.8] }}
+          transition={{ repeat: Infinity, duration: 1.5 }}
+          style={{
+            position: 'absolute', top: '24px', background: 'rgba(49,130,246,0.2)', padding: '12px 24px',
+            borderRadius: '30px', color: '#3182F6', fontWeight: 600, border: '1px solid currentColor', zIndex: 100,
+          }}
+        >
+          💡 소리를 들으려면 화면을 한 번 클릭해주세요
+        </motion.div>
+      )}
 
       {/* ─── 대기 화면 ─── */}
       <AnimatePresence mode="wait">
