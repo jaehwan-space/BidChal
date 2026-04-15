@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useThemeStore } from '../../store/useThemeStore';
+import { BottomNav } from './BottomNav';
 import styles from './Layout.module.css';
 
 export function Header() {
@@ -56,6 +57,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <main className={styles.main}>
         {children}
       </main>
+      <BottomNav />
     </div>
   );
 }

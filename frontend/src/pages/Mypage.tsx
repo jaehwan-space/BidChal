@@ -1,33 +1,21 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Scanner } from '@yudiel/react-qr-scanner';
 import { Card } from '../components/common/Card';
 import { Button } from '../components/common/Button';
+import { Input } from '../components/common/Input';
 import { useAuthStore } from '../store/useAuthStore';
 import { Skeleton } from '../components/common/Skeleton';
 import toast from 'react-hot-toast';
 
 interface PointTransaction {
-  id: string;
-  amount: number;
-  reason: 'CHARGE' | 'DEPOSIT' | 'REFUND' | 'WINNING_PAY';
-  createdAt: string;
+  id: string; amount: number; reason: string; createdAt: string;
 }
-
 interface WonItem {
-  id: string;
-  name: string;
-  imageUrl: string | null;
-  finalPrice: number;
-  room: { title: string };
-  updatedAt: string;
+  id: string; name: string; imageUrl: string | null; finalPrice: number; room: { title: string }; updatedAt: string;
 }
-
 interface MypageData {
-  user: {
-    username: string;
-    points: number;
-    createdAt: string;
-  };
+  user: { username: string; points: number; createdAt: string; };
   transactions: PointTransaction[];
   wonItems: WonItem[];
 }
@@ -38,123 +26,159 @@ export function Mypage() {
   const [data, setData] = useState<MypageData | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // States for Modals/Sheets
+  const [activeModal, setActiveModal] = useState<'none' | 'profile' | 'gift' | 'charge'>('none');
+  
+  // Profile Editor
+  const [editName, setEditName] = useState('');
+  
+  // Gift
+  const [giftTarget, setGiftTarget] = useState('');
+  const [giftAmount, setGiftAmount] = useState('');
+
+  // Charge / QR
+  const [couponCode, setCouponCode] = useState('');
+  const [showQR, setShowQR] = useState(false);
+
   useEffect(() => {
-    if (!token) {
-      navigate('/login');
-      return;
-    }
+    if (!token) { navigate('/login'); return; }
     fetchMypage();
   }, [token, navigate]);
 
   const fetchMypage = async () => {
     try {
-      const res = await fetch('/api/users/mypage', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await fetch('/api/users/mypage', { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) throw new Error('Failed to fetch data');
       const json = await res.json();
       setData(json);
+      setEditName(json.user.username);
       updateUser({ points: json.user.points });
-    } catch (error) {
-      console.error(error);
-      toast.error('정보를 불러오는데 실패했습니다.');
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) { toast.error('정보를 불러오는데 실패했습니다.'); } 
+    finally { setLoading(false); }
   };
 
-  const handleCharge = async () => {
-    const amount = 100000; // 테스트용 10만 포인트 충전
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      const res = await fetch('/api/users/charge', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ amount })
+      const res = await fetch('/api/users/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ username: editName })
       });
-      if (!res.ok) throw new Error('Charge failed');
-      
-      toast.success(`${amount.toLocaleString()} 포인트가 충전되었습니다.`);
-      fetchMypage(); // 새로고침
-    } catch (error) {
-      toast.error('충전에 실패했습니다.');
-    }
+      const resData = await res.json();
+      if (!res.ok) throw new Error(resData.error || 'Failed');
+      toast.success('프로필이 수정되었습니다.');
+      updateUser({ username: resData.username });
+      setActiveModal('none');
+      fetchMypage();
+    } catch (error: any) { toast.error(error.message); }
   };
 
-  if (loading) {
-    return <div style={{ padding: '24px' }}><Skeleton height={200} /><Skeleton height={400} style={{ marginTop: '20px' }} /></div>;
-  }
+  const handleGift = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('/api/users/gift', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ targetUsername: giftTarget, amount: Number(giftAmount) })
+      });
+      const resData = await res.json();
+      if (!res.ok) throw new Error(resData.error || 'Failed');
+      toast.success(`${giftTarget}님에게 ${Number(giftAmount).toLocaleString()}P를 선물했습니다.`);
+      setActiveModal('none');
+      setGiftTarget(''); setGiftAmount('');
+      fetchMypage();
+    } catch (error: any) { toast.error(error.message); }
+  };
 
+  const submitCoupon = async (code: string) => {
+    try {
+      const res = await fetch('/api/users/coupon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ code })
+      });
+      const resData = await res.json();
+      if (!res.ok) throw new Error(resData.error || 'Failed');
+      toast.success(`${resData.amount.toLocaleString()} 포인트가 충전되었습니다!`);
+      setShowQR(false);
+      setActiveModal('none');
+      setCouponCode('');
+      fetchMypage();
+    } catch (error: any) { toast.error(error.message); }
+  };
+
+  const handleChargeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (couponCode) await submitCoupon(couponCode);
+  };
+
+  if (loading) return <div style={{ padding: '24px' }}><Skeleton height={200} /><Skeleton height={400} style={{ marginTop: '20px' }} /></div>;
   if (!data) return <div style={{ padding: '24px' }}>오류가 발생했습니다.</div>;
 
   return (
-    <div style={{ padding: '24px', maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div style={{ paddingBottom: '80px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
       
-      {/* 1. 내 지갑 섹션 */}
+      {/* --- 프로필 섹션 --- */}
+      <div style={{ padding: '16px 8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 800 }}>{data.user.username}</h2>
+          <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>가입일: {new Date(data.user.createdAt).toLocaleDateString()}</span>
+        </div>
+        <Button variant="secondary" onClick={() => setActiveModal('profile')}>프로필 수정</Button>
+      </div>
+
+      {/* --- 지갑 섹션 --- */}
       <Card title="내 지갑 💳">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
-            <div style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>{data.user.username}님의 잔여 포인트</div>
+            <div style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>이용 가능 잔고</div>
             <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--primary)' }}>
-              {data.user.points.toLocaleString()} P
+              {data.user.points.toLocaleString()} <span style={{ fontSize: '20px' }}>P</span>
             </div>
           </div>
-          <Button variant="primary" onClick={handleCharge}>
-            💰 10만 P 충전하기
-          </Button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Button variant="primary" style={{ flex: 1 }} onClick={() => setActiveModal('charge')}>포인트 충전/쿠폰</Button>
+            <Button variant="secondary" style={{ flex: 1 }} onClick={() => setActiveModal('gift')}>선물하기</Button>
+          </div>
         </div>
-        
-        <div style={{ maxHeight: '300px', overflowY: 'auto', borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
-          <h4 style={{ margin: '0 0 12px 0', color: 'var(--text-secondary)' }}>최근 내역</h4>
-          {data.transactions.length === 0 ? (
-            <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>포인트 내역이 없습니다.</p>
-          ) : (
-            data.transactions.map(tx => (
-              <div key={tx.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--border-color)' }}>
-                <div>
-                  <div style={{ fontWeight: 600 }}>
-                    {tx.reason === 'CHARGE' ? '통장 충전' : 
-                     tx.reason === 'DEPOSIT' ? '입찰 보증금' : 
-                     tx.reason === 'REFUND' ? '입찰 취소 환불' : '결제 내역'}
+
+        <div style={{ marginTop: '24px', borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
+          <h4 style={{ margin: '0 0 12px 0', color: 'var(--text-secondary)' }}>최근 사용 내역</h4>
+          <div style={{ maxHeight: '240px', overflowY: 'auto' }}>
+            {data.transactions.length === 0 ? <p style={{ color: 'var(--text-secondary)' }}>내역이 없습니다.</p> :
+              data.transactions.map(tx => (
+                <div key={tx.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--glass-border)' }}>
+                  <div>
+                    <div style={{ fontWeight: 600 }}>{tx.reason === 'CHARGE' ? '포인트 충전' : tx.reason === 'DEPOSIT' ? '입찰 참여' : tx.reason === 'REFUND' ? '입찰 환불' : '결제 완료'}</div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{new Date(tx.createdAt).toLocaleString()}</div>
                   </div>
-                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                    {new Date(tx.createdAt).toLocaleString()}
+                  <div style={{ fontWeight: 700, color: tx.amount > 0 ? 'var(--success)' : 'var(--text-primary)' }}>
+                    {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()} P
                   </div>
                 </div>
-                <div style={{ fontWeight: 700, color: tx.amount > 0 ? 'var(--success)' : 'var(--danger)' }}>
-                  {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()} P
-                </div>
-              </div>
-            ))
-          )}
+              ))}
+          </div>
         </div>
       </Card>
 
-      {/* 2. 낙찰 내역 섹션 */}
-      <Card title="나의 낙찰 내역 🎉">
+      {/* --- 낙찰 내역 섹션 --- */}
+      <Card title="나의 경매 낙찰 내역 🎉">
         {data.wonItems.length === 0 ? (
-          <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '40px 0' }}>낙찰 받은 물건이 없습니다.</p>
+          <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '40px 0' }}>물건이 없습니다.</p>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {data.wonItems.map(item => (
-              <div key={item.id} style={{ 
-                background: 'var(--glass-bg)', 
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)',
-                borderRadius: 'var(--border-radius-md)', 
-                overflow: 'hidden', border: '1px solid var(--glass-border)' 
-              }}>
+              <div key={item.id} style={{ display: 'flex', gap: '16px', background: 'var(--glass-bg)', padding: '12px', borderRadius: 'var(--border-radius-md)', border: '1px solid var(--glass-border)' }}>
                 {item.imageUrl ? (
-                  <img src={item.imageUrl} alt={item.name} style={{ width: '100%', aspectRatio: '1', objectFit: 'cover' }} />
+                  <img src={item.imageUrl} alt={item.name} style={{ width: '80px', height: '80px', borderRadius: '12px', objectFit: 'cover' }} />
                 ) : (
-                  <div style={{ width: '100%', aspectRatio: '1', background: '#222', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '40px' }}>📦</div>
+                  <div style={{ width: '80px', height: '80px', borderRadius: '12px', background: '#2C2C2E', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px' }}>📦</div>
                 )}
-                <div style={{ padding: '16px' }}>
-                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>{item.room.title}</div>
-                  <div style={{ fontWeight: 600, fontSize: '16px', marginBottom: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</div>
-                  <div style={{ color: 'var(--primary)', fontWeight: 700 }}>{item.finalPrice.toLocaleString()} P</div>
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{item.room.title}</div>
+                  <div style={{ fontWeight: 700, fontSize: '16px' }}>{item.name}</div>
+                  <div style={{ color: 'var(--primary)', fontWeight: 800, marginTop: '4px' }}>결제가: {item.finalPrice.toLocaleString()} P</div>
                 </div>
               </div>
             ))}
@@ -162,9 +186,59 @@ export function Mypage() {
         )}
       </Card>
 
-      <Button variant="secondary" onClick={() => navigate('/')} style={{ marginTop: '12px' }}>
-        🏠 로비로 돌아가기
-      </Button>
+      {/* --- Modals (Toss BottomSheet Style) --- */}
+      {activeModal !== 'none' && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+          <div style={{ background: 'var(--panel-bg)', padding: '24px', borderRadius: '24px 24px 0 0', display: 'flex', flexDirection: 'column', gap: '16px' }} onClick={(e) => e.stopPropagation()}>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0, fontSize: '20px' }}>
+                {activeModal === 'profile' ? '프로필 수정' : activeModal === 'gift' ? '포인트 선물하기' : '포인트 충전'}
+              </h3>
+              <button onClick={() => { setActiveModal('none'); setShowQR(false); }} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: 'var(--text-secondary)' }}>×</button>
+            </div>
+
+            {activeModal === 'profile' && (
+              <form onSubmit={handleUpdateProfile} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <Input label="새 닉네임" value={editName} onChange={e => setEditName(e.target.value)} />
+                <Button variant="primary" type="submit">변경 내용 저장</Button>
+              </form>
+            )}
+
+            {activeModal === 'gift' && (
+              <form onSubmit={handleGift} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <Input label="선물 할 계정(닉네임)" value={giftTarget} onChange={e => setGiftTarget(e.target.value)} placeholder="받는 사람 닉네임" />
+                <Input label="금액" type="number" value={giftAmount} onChange={e => setGiftAmount(e.target.value)} placeholder="보낼 금액 입력" />
+                <Button variant="primary" type="submit">선물 쏘기 💸</Button>
+              </form>
+            )}
+
+            {activeModal === 'charge' && (
+              <form onSubmit={handleChargeSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {!showQR ? (
+                  <>
+                    <Input label="쿠폰 코드 입력" value={couponCode} onChange={e => setCouponCode(e.target.value)} placeholder="BIDCHAL-100 등 대소문자 구분" />
+                    <Button variant="primary" type="submit" disabled={!couponCode}>쿠폰 코드 사용</Button>
+                    <div style={{ textAlign: 'center', margin: '8px 0', color: 'var(--text-secondary)' }}>또는</div>
+                    <Button variant="secondary" type="button" onClick={() => setShowQR(true)}>📷 QR코드로 스캔하여 충전하기</Button>
+                  </>
+                ) : (
+                  <div style={{ width: '100%', height: '300px', overflow: 'hidden', borderRadius: '12px' }}>
+                    <Scanner
+                      onScan={(result) => submitCoupon(result[0].rawValue)}
+                      allowMultiple={false}
+                    />
+                    <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginTop: '8px' }}>화면 표면의 QR코드를 카메라에 비춰주세요.</p>
+                  </div>
+                )}
+              </form>
+            )}
+
+          </div>
+          <div style={{ flex: 1 }} onClick={() => setActiveModal('none')} />
+        </div>
+      )}
+
     </div>
   );
 }
