@@ -14,7 +14,7 @@ import { motion } from 'framer-motion';
 
 export function Lobby() {
   const { connect, disconnect, isConnected } = useSocketStore();
-  const { user, token, logout, updateUser } = useAuthStore();
+  const { user, token, updateUser } = useAuthStore();
   const navigate = useNavigate();
   
   const { data: rooms, isLoading, isError, refetch: refetchRooms } = useRooms();
@@ -53,10 +53,7 @@ export function Lobby() {
     };
   }, [connect, disconnect]);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  }
+
 
   const handleCreateRoom = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,15 +78,10 @@ export function Lobby() {
       
       {/* Header Profile */}
       <Card title={`환영합니다, ${user?.username || '게스트'}님!`}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+        <div style={{ marginBottom: '16px' }}>
           <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '14px' }}>
             다양한 경매방에 참여해보세요.
           </p>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <Button variant="danger" onClick={handleLogout} style={{ padding: '8px 12px', fontSize: '12px' }}>
-              로그아웃
-            </Button>
-          </div>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <p style={{ color: 'var(--primary)', fontWeight: 600, fontSize: '18px', margin: 0 }}>

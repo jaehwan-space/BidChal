@@ -61,3 +61,14 @@
     padding: 0 40px;
   }
 }
+
+/* Utilities */
+.desktopOnly {
+  display: none !important;
+}
+
+@media (min-width: 1024px) {
+  .desktopOnly {
+    display: flex !important;
+  }
+}

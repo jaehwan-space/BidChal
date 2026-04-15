@@ -21,7 +21,7 @@ interface MypageData {
 }
 
 export function Mypage() {
-  const { token, updateUser } = useAuthStore();
+  const { token, updateUser, logout } = useAuthStore();
   const navigate = useNavigate();
   const [data, setData] = useState<MypageData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -125,7 +125,10 @@ export function Mypage() {
           <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 800 }}>{data.user.username}</h2>
           <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>가입일: {new Date(data.user.createdAt).toLocaleDateString()}</span>
         </div>
-        <Button variant="secondary" onClick={() => setActiveModal('profile')}>프로필 수정</Button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Button variant="secondary" onClick={() => setActiveModal('profile')}>프로필 수정</Button>
+          <Button variant="danger" onClick={() => { logout(); navigate('/login'); }}>로그아웃</Button>
+        </div>
       </div>
 
       {/* --- 지갑 섹션 --- */}

@@ -26,11 +26,8 @@ function App() {
   const theme = useThemeStore((state) => state.theme);
 
   useEffect(() => {
-    if (theme === 'system') {
-      document.documentElement.removeAttribute('data-theme');
-    } else {
-      document.documentElement.setAttribute('data-theme', theme);
-    }
+    const resolved = theme === 'system' ? 'light' : theme;
+    document.documentElement.setAttribute('data-theme', resolved);
   }, [theme]);
 
   return (
