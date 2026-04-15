@@ -10,7 +10,8 @@ import { DisplayView } from './pages/DisplayView';
 import { Mypage } from './pages/Mypage';
 import { useAuthStore } from './store/useAuthStore';
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
+import { useThemeStore } from './store/useThemeStore';
 
 // 인증 가드 (PrivateRoute)
 function RequireAuth({ children }: { children: ReactNode }) {
@@ -22,6 +23,16 @@ function RequireAuth({ children }: { children: ReactNode }) {
 }
 
 function App() {
+  const theme = useThemeStore((state) => state.theme);
+
+  useEffect(() => {
+    if (theme === 'system') {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+  }, [theme]);
+
   return (
     <Routes>
       {/* 디스플레이 뷰 - Layout 없이 풀스크린 (로그인 필요) */}

@@ -1,7 +1,8 @@
 .layout {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100dvh; /* Mobile browser bottom nav friendly */
+  overflow: hidden;
 }
 
 .main {
@@ -9,8 +10,11 @@
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
-  padding: 24px 16px;
+  padding: 16px;
   box-sizing: border-box;
+  overflow-y: auto; /* Pages like Lobby can scroll, Room will fill */
+  display: flex;
+  flex-direction: column;
 }
 
 .header {

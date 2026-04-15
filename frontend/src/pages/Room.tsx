@@ -272,16 +272,22 @@ export function Room() {
 
             {/* 입찰 영역 */}
             <Card title="">
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ textAlign: 'right', fontSize: '14px', color: 'var(--text-secondary)' }}>
-                  최소 입찰가: {(activeItem.currentHighest + 1).toLocaleString()}P
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, justifyContent: 'flex-end' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                    내 포인트: <span style={{ fontWeight: 600, color: 'var(--primary)' }}>{user?.points?.toLocaleString() ?? 0} P</span>
+                  </div>
+                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                    최소 입찰: {(activeItem.currentHighest + 1).toLocaleString()} P
+                  </div>
                 </div>
                 
                 <div style={{ 
                   padding: '12px', background: 'var(--bg-color)', 
                   border: '2px solid var(--border-color)', borderRadius: '12px',
                   fontSize: '24px', fontWeight: 700, textAlign: 'right', minHeight: '28px',
-                  color: bidString ? 'var(--text-primary)' : 'var(--text-secondary)'
+                  color: bidString ? 'var(--text-primary)' : 'var(--text-secondary)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'flex-end'
                 }}>
                   {bidString ? Number(bidString).toLocaleString() + ' P' : '0 P'}
                 </div>
