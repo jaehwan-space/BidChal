@@ -27,7 +27,11 @@ export function setupSockets(io: Server) {
             items: {
               orderBy: { createdAt: 'asc' },
               include: {
-                bids: { orderBy: { amount: 'desc' }, take: 1 },
+                bids: { 
+                  orderBy: { amount: 'desc' }, 
+                  take: 1, 
+                  include: { user: { select: { username: true } } } 
+                },
                 _count: { select: { bids: true } }
               }
             }
@@ -194,7 +198,13 @@ export function setupSockets(io: Server) {
           include: {
             items: {
               orderBy: { createdAt: 'asc' },
-              include: { bids: { orderBy: { amount: 'desc' }, take: 1 } }
+              include: { 
+                bids: { 
+                  orderBy: { amount: 'desc' }, 
+                  take: 1, 
+                  include: { user: { select: { username: true } } } 
+                } 
+              }
             }
           }
         });

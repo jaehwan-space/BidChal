@@ -33,7 +33,7 @@ interface MypageData {
 }
 
 export function Mypage() {
-  const { token } = useAuthStore();
+  const { token, updateUser } = useAuthStore();
   const navigate = useNavigate();
   const [data, setData] = useState<MypageData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -54,6 +54,7 @@ export function Mypage() {
       if (!res.ok) throw new Error('Failed to fetch data');
       const json = await res.json();
       setData(json);
+      updateUser({ points: json.user.points });
     } catch (error) {
       console.error(error);
       toast.error('정보를 불러오는데 실패했습니다.');

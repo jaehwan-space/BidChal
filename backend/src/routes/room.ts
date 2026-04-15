@@ -19,6 +19,12 @@ router.post('/', async (req, res) => {
       }
     });
 
+    // 방 생성 후 로비 업데이트 브로드캐스트
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('lobby_update');
+    }
+
     res.status(201).json(room);
   } catch (error) {
     console.error(error);

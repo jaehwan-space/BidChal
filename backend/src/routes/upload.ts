@@ -5,8 +5,8 @@ import fs from 'fs';
 
 const router = Router();
 
-// uploads 디렉토리 생성
-const uploadDir = path.join(__dirname, '..', 'uploads');
+// uploads 디렉토리 생성 (항상 프로젝트 루트 기준)
+const uploadDir = path.join(process.cwd(), 'uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }

@@ -43,7 +43,19 @@ export function HostControl() {
         setRemainingTime(data.remainingTime);
         setCurrentIndex(data.currentIndex);
         setTotalItems(data.totalItems);
-        setPhase('active');
+        
+        if (data.activeItem.bids && data.activeItem.bids.length > 0 && data.activeItem.bids[0].user) {
+          setLastBidderName(data.activeItem.bids[0].user.username);
+        }
+
+        // 이미 종료된 아이템인지 확인
+        if (data.activeItem.status === 'SOLD') {
+          setPhase('sold');
+        } else if (data.activeItem.status === 'PASSED') {
+          setPhase('passed');
+        } else {
+          setPhase('active');
+        }
       } else if (data.roomStatus === 'FINISHED') {
         setPhase('ended');
       } else {
@@ -56,6 +68,7 @@ export function HostControl() {
       setRemainingTime(data.remainingTime);
       setCurrentIndex(data.currentIndex);
       setTotalItems(data.totalItems);
+      setLastBidderName(null);
       setPhase('active');
     };
 
@@ -64,6 +77,7 @@ export function HostControl() {
       setRemainingTime(data.remainingTime);
       setCurrentIndex(data.currentIndex);
       setTotalItems(data.totalItems);
+      setLastBidderName(null);
       setPhase('active');
     };
 

@@ -25,6 +25,11 @@ router.post('/', async (req, res) => {
       }
     });
 
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('lobby_update');
+    }
+
     res.status(201).json(item);
   } catch (error) {
     console.error(error);
