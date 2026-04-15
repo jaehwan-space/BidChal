@@ -191,16 +191,47 @@ export function Mypage() {
 
       {/* --- Modals (Toss BottomSheet Style) --- */}
       {activeModal !== 'none' && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-          <div style={{ background: 'var(--panel-bg)', padding: '24px', borderRadius: '24px 24px 0 0', display: 'flex', flexDirection: 'column', gap: '16px' }} onClick={(e) => e.stopPropagation()}>
-            
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ margin: 0, fontSize: '20px' }}>
-                {activeModal === 'profile' ? '프로필 수정' : activeModal === 'gift' ? '포인트 선물하기' : '포인트 충전'}
-              </h3>
-              <button onClick={() => { setActiveModal('none'); setShowQR(false); }} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: 'var(--text-secondary)' }}>×</button>
+        <div 
+          style={{ 
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+            background: 'rgba(0,0,0,0.45)', zIndex: 9999, 
+            display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
+            animation: 'fadeIn 0.2s ease-out'
+          }}
+          onClick={() => { setActiveModal('none'); setShowQR(false); }}
+        >
+          <div 
+            style={{ 
+              background: 'var(--panel-bg)', 
+              padding: '0 24px 24px', 
+              borderRadius: '20px 20px 0 0', 
+              maxHeight: '85vh',
+              overflowY: 'auto',
+              display: 'flex', flexDirection: 'column', gap: '20px',
+              animation: 'slideUp 0.3s ease-out',
+              paddingBottom: 'calc(24px + env(safe-area-inset-bottom))'
+            }} 
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* 드래그 핸들 바 */}
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 4px' }}>
+              <div style={{ width: '40px', height: '4px', borderRadius: '2px', background: 'var(--border-color)' }} />
             </div>
 
+            {/* 제목 및 닫기 */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0, fontSize: '20px', fontWeight: 700 }}>
+                {activeModal === 'profile' ? '프로필 수정' : activeModal === 'gift' ? '포인트 선물하기' : '포인트 충전'}
+              </h3>
+              <button 
+                onClick={() => { setActiveModal('none'); setShowQR(false); }} 
+                style={{ background: 'var(--bg-color)', border: 'none', width: '32px', height: '32px', borderRadius: '50%', fontSize: '18px', cursor: 'pointer', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* 프로필 수정 */}
             {activeModal === 'profile' && (
               <form onSubmit={handleUpdateProfile} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <Input label="새 닉네임" value={editName} onChange={e => setEditName(e.target.value)} />
@@ -208,6 +239,7 @@ export function Mypage() {
               </form>
             )}
 
+            {/* 선물하기 */}
             {activeModal === 'gift' && (
               <form onSubmit={handleGift} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <Input label="선물 할 계정(닉네임)" value={giftTarget} onChange={e => setGiftTarget(e.target.value)} placeholder="받는 사람 닉네임" />
@@ -216,29 +248,36 @@ export function Mypage() {
               </form>
             )}
 
+            {/* 포인트 충전 */}
             {activeModal === 'charge' && (
               <form onSubmit={handleChargeSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {!showQR ? (
                   <>
-                    <Input label="쿠폰 코드 입력" value={couponCode} onChange={e => setCouponCode(e.target.value)} placeholder="BIDCHAL-100 등 대소문자 구분" />
+                    <Input label="쿠폰 코드 입력" value={couponCode} onChange={e => setCouponCode(e.target.value)} placeholder="BIDCHAL-100 등" />
                     <Button variant="primary" type="submit" disabled={!couponCode}>쿠폰 코드 사용</Button>
-                    <div style={{ textAlign: 'center', margin: '8px 0', color: 'var(--text-secondary)' }}>또는</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '4px 0' }}>
+                      <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }} />
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>또는</span>
+                      <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }} />
+                    </div>
                     <Button variant="secondary" type="button" onClick={() => setShowQR(true)}>📷 QR코드로 스캔하여 충전하기</Button>
                   </>
                 ) : (
-                  <div style={{ width: '100%', height: '300px', overflow: 'hidden', borderRadius: '12px' }}>
-                    <Scanner
-                      onScan={(result) => submitCoupon(result[0].rawValue)}
-                      allowMultiple={false}
-                    />
-                    <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginTop: '8px' }}>화면 표면의 QR코드를 카메라에 비춰주세요.</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div style={{ width: '100%', height: '280px', overflow: 'hidden', borderRadius: '16px', border: '2px solid var(--border-color)' }}>
+                      <Scanner
+                        onScan={(result) => submitCoupon(result[0].rawValue)}
+                        allowMultiple={false}
+                      />
+                    </div>
+                    <p style={{ textAlign: 'center', color: 'var(--text-secondary)', margin: 0, fontSize: '14px' }}>QR코드를 카메라에 비춰주세요</p>
+                    <Button variant="secondary" type="button" onClick={() => setShowQR(false)}>← 쿠폰 코드 직접 입력</Button>
                   </div>
                 )}
               </form>
             )}
 
           </div>
-          <div style={{ flex: 1 }} onClick={() => setActiveModal('none')} />
         </div>
       )}
 
