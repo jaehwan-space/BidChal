@@ -10,6 +10,7 @@ import roomRoutes from './routes/room';
 import itemRoutes from './routes/item';
 import authRoutes from './routes/auth';
 import uploadRoutes from './routes/upload';
+import userRoutes from './routes/user';
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/rooms/:roomId/items', itemRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/users', userRoutes);
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {

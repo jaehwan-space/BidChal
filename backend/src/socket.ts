@@ -102,7 +102,7 @@ export function setupSockets(io: Server) {
       }
     });
 
-    // ─── 4. 입찰 ───
+    // ─── 4. 입찰 (포인트 차감 및 환불 로직 포함) ───
     socket.on('new_bid', async ({ roomId, itemId, amount, userId }) => {
       try {
         const item = await prisma.item.findUnique({
@@ -120,25 +120,67 @@ export function setupSockets(io: Server) {
           return socket.emit('bid_error', { message: `입찰가는 ${currentHighest.toLocaleString()}P 보다 커야 합니다.` });
         }
 
-        // DB에 입찰 기록
-        await prisma.bid.create({
-          data: { itemId, userId, amount }
-        });
+        // 트랜잭션으로 잔고 검사, 차감, 환불, 입찰 기록을 원자적으로 처리
+        const user = await prisma.$transaction(async (tx) => {
+          // 1. 유저 잔고 확인
+          const bidder = await tx.user.findUnique({ where: { id: userId } });
+          if (!bidder || bidder.points < amount) {
+            throw new Error(`INSUFFICIENT_FUNDS`);
+          }
 
-        const user = await prisma.user.findUnique({ where: { id: userId }, select: { username: true } });
+          const previousBid = item.bids?.[0];
+
+          // 2. 기존 최고 입찰자가 있다면 환불 (REFUND)
+          if (previousBid) {
+            await tx.user.update({
+              where: { id: previousBid.userId },
+              data: { points: { increment: previousBid.amount } }
+            });
+            await tx.pointTransaction.create({
+              data: {
+                userId: previousBid.userId,
+                amount: previousBid.amount,
+                reason: 'REFUND'
+              }
+            });
+          }
+
+          // 3. 현재 입찰자 지갑에서 즉시 차감 (DEPOSIT)
+          const updatedUser = await tx.user.update({
+            where: { id: userId },
+            data: { points: { decrement: amount } }
+          });
+          await tx.pointTransaction.create({
+            data: {
+              userId,
+              amount: -amount,
+              reason: 'DEPOSIT'
+            }
+          });
+
+          // 4. 새로운 입찰 기록
+          await tx.bid.create({
+            data: { itemId, userId, amount }
+          });
+
+          return updatedUser;
+        });
 
         // 방 전체에 브로드캐스트
         io.to(roomId).emit('update_bid', {
           itemId,
           newAmount: amount,
           lastBidder: userId,
-          lastBidderName: user?.username ?? '알 수 없음',
+          lastBidderName: user.username,
           auctionType: item.auctionType,
           totalBids: (item.bids?.length ?? 0) + 1
         });
 
-        socket.emit('bid_success', { message: '입찰 완료!' });
-      } catch (err) {
+        socket.emit('bid_success', { message: '입찰 완료!', points: user.points });
+      } catch (err: any) {
+        if (err.message === 'INSUFFICIENT_FUNDS') {
+          return socket.emit('bid_error', { message: '지갑에 포인트가 부족합니다. 마이페이지에서 충전해주세요.' });
+        }
         console.error('new_bid error:', err);
         socket.emit('bid_error', { message: '입찰 처리 중 오류가 발생했습니다.' });
       }
