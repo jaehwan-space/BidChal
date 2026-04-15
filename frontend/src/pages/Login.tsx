@@ -49,13 +49,14 @@ export function Login() {
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
       style={{ maxWidth: '440px', margin: '0 auto', width: '100%', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
       <Card title="BidChal 로그인" subtitle="모의 경매 플랫폼에 다시 오신 것을 환영합니다.">
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <Input 
           label="이메일" 
-          type="email"
+          type="text"
           value={email} 
           onChange={(e) => { setEmail(e.target.value); setErrorMsg(''); }} 
-          placeholder="이메일 주소를 입력하세요" 
+          placeholder="example@email.com" 
+          autoComplete="email"
         />
         <Input 
           label="비밀번호" 
