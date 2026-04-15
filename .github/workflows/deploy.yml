@@ -54,6 +54,11 @@ jobs:
             git reset --hard origin/main
             git pull origin main
             
+            # Nginx 설정 동기화 및 리로드
+            sudo cp nginx_example.conf /etc/nginx/sites-available/bidchal
+            sudo ln -sf /etc/nginx/sites-available/bidchal /etc/nginx/sites-enabled/bidchal
+            sudo nginx -t && sudo systemctl reload nginx
+            
             # 도커 빌드 & 재시작
             curl -SL https://github.com/docker/compose/releases/download/v2.26.1/docker-compose-linux-x86_64 -o ./docker-compose-bin
             chmod +x ./docker-compose-bin
