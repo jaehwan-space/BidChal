@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '../components/common/Card';
 import { Button } from '../components/common/Button';
-import { Input } from '../components/common/Input';
 import { useRoom, Item } from '../hooks/useRooms';
 import { useSocketStore } from '../store/useSocketStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { Skeleton } from '../components/common/Skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Keypad } from '../components/common/Keypad';
 
 type BidderPhase = 'waiting' | 'active' | 'sold' | 'passed' | 'ended';
 
@@ -23,9 +23,10 @@ export function Room() {
   const [remainingTime, setRemainingTime] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
-  const [bidAmount, setBidAmount] = useState<number>(0);
+  const [bidString, setBidString] = useState<string>('');
   const [soldInfo, setSoldInfo] = useState<{ winnerName: string; finalPrice: number; itemName: string } | null>(null);
   const [maxTime, setMaxTime] = useState(30);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => { connect(); }, [connect]);
 
@@ -46,6 +47,7 @@ export function Room() {
         } else {
           setPhase('active');
         }
+        setIsPaused(Boolean(data.isPaused));
       } else if (data.roomStatus === 'FINISHED') {
         setPhase('ended');
       }
@@ -58,7 +60,8 @@ export function Room() {
       setTotalItems(data.totalItems);
       setMaxTime(data.remainingTime);
       setPhase('active');
-      setBidAmount(0);
+      setBidString('');
+      setIsPaused(false);
     };
 
     const handleItemActive = (data: any) => {
@@ -68,11 +71,25 @@ export function Room() {
       setTotalItems(data.totalItems);
       setMaxTime(data.remainingTime);
       setPhase('active');
-      setBidAmount(0);
+      setBidString('');
+      setIsPaused(false);
     };
 
     const handleTimerTick = (data: { remainingTime: number }) => {
       setRemainingTime(data.remainingTime);
+    };
+
+    const handleTimerPaused = (data: { isPaused: boolean }) => {
+      setIsPaused(data.isPaused);
+    };
+
+    const handleItemReset = (data: any) => {
+      setActiveItem(data.activeItem);
+      setRemainingTime(data.remainingTime);
+      setMaxTime(data.remainingTime);
+      setPhase('active');
+      setBidString('');
+      setIsPaused(false);
     };
 
     const handleUpdateBid = (data: any) => {
@@ -83,7 +100,7 @@ export function Room() {
     };
 
     const handleBidSuccess = (_data: { message: string }) => {
-      // 간단한 피드백 - alert 대신 나중에 토스트로
+      setBidString('');
     };
 
     const handleBidError = (data: { message: string }) => {
@@ -107,6 +124,8 @@ export function Room() {
     socket.on('auction_started', handleAuctionStarted);
     socket.on('item_active', handleItemActive);
     socket.on('timer_tick', handleTimerTick);
+    socket.on('timer_paused', handleTimerPaused);
+    socket.on('item_reset', handleItemReset);
     socket.on('update_bid', handleUpdateBid);
     socket.on('bid_success', handleBidSuccess);
     socket.on('bid_error', handleBidError);
@@ -119,6 +138,8 @@ export function Room() {
       socket.off('auction_started', handleAuctionStarted);
       socket.off('item_active', handleItemActive);
       socket.off('timer_tick', handleTimerTick);
+      socket.off('timer_paused', handleTimerPaused);
+      socket.off('item_reset', handleItemReset);
       socket.off('update_bid', handleUpdateBid);
       socket.off('bid_success', handleBidSuccess);
       socket.off('bid_error', handleBidError);
@@ -129,7 +150,8 @@ export function Room() {
   }, [socket, isConnected, roomId]);
 
   const handleBid = () => {
-    if (!activeItem || !bidAmount || bidAmount <= activeItem.currentHighest) {
+    const num = Number(bidString);
+    if (!activeItem || !num || num <= activeItem.currentHighest) {
       alert(`최소 입찰가(${(activeItem?.currentHighest ?? 0).toLocaleString()}P)보다 높은 금액을 입력해주세요.`);
       return;
     }
@@ -137,10 +159,9 @@ export function Room() {
       socket.emit('new_bid', {
         roomId,
         itemId: activeItem.id,
-        amount: bidAmount,
-        userId: user?.id
+        userId: user?.id,
+        amount: num
       });
-      setBidAmount(0);
     }
   };
 
@@ -190,9 +211,14 @@ export function Room() {
           <motion.div key="active" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
             style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             
-            {/* 타이머 바 */}
+            {/* 타이머 바 (일시정지 시 오버레이 처리) */}
             <div style={{ padding: '12px 16px', background: 'var(--panel-bg)', borderRadius: 'var(--border-radius-md)', 
-              border: '1px solid var(--border-color)' }}>
+              border: '1px solid var(--border-color)', position: 'relative', overflow: 'hidden' }}>
+              {isPaused && (
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ color: 'white', fontWeight: 800, fontSize: '18px', letterSpacing: '2px' }}>일시정지 됨</span>
+                </div>
+              )}
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                 <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>아이템 {currentIndex}/{totalItems}</span>
                 <motion.span key={remainingTime} initial={{ scale: remainingTime <= 5 ? 1.3 : 1 }} animate={{ scale: 1 }}
@@ -202,7 +228,7 @@ export function Room() {
               </div>
               <div style={{ width: '100%', height: '6px', background: 'var(--border-color)', borderRadius: '3px', overflow: 'hidden' }}>
                 <motion.div animate={{ width: `${Math.min(100, (remainingTime / maxTime) * 100)}%` }}
-                  style={{ height: '100%', background: timerColor, borderRadius: '3px' }} />
+                  style={{ height: '100%', background: isPaused ? 'var(--text-secondary)' : timerColor, borderRadius: '3px' }} />
               </div>
             </div>
 
@@ -249,18 +275,31 @@ export function Room() {
 
             {/* 입찰 영역 */}
             <Card title="">
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
-                <Input
-                  label="희망 입찰가 (P)"
-                  type="number"
-                  value={bidAmount || ''}
-                  onChange={(e) => setBidAmount(Number(e.target.value))}
-                  placeholder={`최소 ${(activeItem.currentHighest + 1).toLocaleString()}P`}
-                  style={{ flex: 1 }}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ textAlign: 'right', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                  최소 입찰가: {(activeItem.currentHighest + 1).toLocaleString()}P
+                </div>
+                
+                <div style={{ 
+                  padding: '16px', background: 'var(--bg-color)', 
+                  border: '2px solid var(--border-color)', borderRadius: '12px',
+                  fontSize: '32px', fontWeight: 700, textAlign: 'right', minHeight: '38px',
+                  color: bidString ? 'var(--text-primary)' : 'var(--text-secondary)'
+                }}>
+                  {bidString ? Number(bidString).toLocaleString() + ' P' : '0 P'}
+                </div>
+
+                <Keypad 
+                  value={bidString} 
+                  onChange={setBidString} 
+                  onEnter={handleBid} 
+                  maxValue={user?.points} 
                 />
+
                 <Button variant="primary" onClick={handleBid}
-                  style={{ height: '48px', padding: '0 24px', fontSize: '16px', fontWeight: 700 }}>
-                  🚀 입찰!
+                  disabled={isPaused}
+                  style={{ width: '100%', height: '56px', fontSize: '18px', fontWeight: 700, marginTop: '8px' }}>
+                  🚀 입찰하기
                 </Button>
               </div>
             </Card>

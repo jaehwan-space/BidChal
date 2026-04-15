@@ -4,6 +4,7 @@ import { prisma } from './prisma';
 // 방별 타이머를 관리하는 Map
 const roomTimers: Map<string, NodeJS.Timeout> = new Map();
 const roomTimerState: Map<string, number> = new Map(); // 남은 초
+const roomTimerPaused: Map<string, boolean> = new Map();
 
 export function setupSockets(io: Server) {
   io.on('connection', (socket: Socket) => {
@@ -265,18 +266,101 @@ export function setupSockets(io: Server) {
       }
     });
 
-    // ─── 6. 타이머 연장 (+10초, 호스트만) ───
-    socket.on('extend_timer', async ({ roomId, hostId }) => {
+    // ─── 6. 타이머 조정 (+/- N초, 호스트만) ───
+    socket.on('adjust_timer', async ({ roomId, hostId, delta }) => {
       try {
         const room = await prisma.room.findUnique({ where: { id: roomId } });
         if (!room || room.hostId !== hostId) return;
 
         const current = roomTimerState.get(roomId) ?? 0;
-        roomTimerState.set(roomId, current + 10);
+        const nextTime = Math.max(1, current + delta); // 최소 1초
+        roomTimerState.set(roomId, nextTime);
 
-        io.to(roomId).emit('timer_tick', { remainingTime: current + 10 });
+        io.to(roomId).emit('timer_tick', { remainingTime: nextTime });
       } catch (err) {
-        console.error('extend_timer error:', err);
+        console.error('adjust_timer error:', err);
+      }
+    });
+
+    // ─── 7. 타이머 일시정지 (호스트만) ───
+    socket.on('pause_timer', async ({ roomId, hostId }) => {
+      try {
+        const room = await prisma.room.findUnique({ where: { id: roomId } });
+        if (!room || room.hostId !== hostId) return;
+
+        roomTimerPaused.set(roomId, true);
+        io.to(roomId).emit('timer_paused', { isPaused: true });
+      } catch (err) {
+        console.error('pause_timer error:', err);
+      }
+    });
+
+    // ─── 8. 타이머 재개 (호스트만) ───
+    socket.on('resume_timer', async ({ roomId, hostId }) => {
+      try {
+        const room = await prisma.room.findUnique({ where: { id: roomId } });
+        if (!room || room.hostId !== hostId) return;
+
+        roomTimerPaused.set(roomId, false);
+        io.to(roomId).emit('timer_paused', { isPaused: false });
+      } catch (err) {
+        console.error('resume_timer error:', err);
+      }
+    });
+
+    // ─── 9. 현재 아이템 경매 초기화 (호스트만) ───
+    socket.on('reset_item', async ({ roomId, hostId }) => {
+      try {
+        const room = await prisma.room.findUnique({
+          where: { id: roomId },
+          include: { items: true }
+        });
+        if (!room || room.hostId !== hostId || !room.activeItemId) return;
+
+        const activeItem = room.items.find(i => i.id === room.activeItemId);
+        if (!activeItem || activeItem.status !== 'ACTIVE') return;
+
+        // 1. 현재 최고 입찰자 환불
+        const previousBid = await prisma.bid.findFirst({
+          where: { itemId: activeItem.id },
+          orderBy: { amount: 'desc' },
+          include: { user: true }
+        });
+
+        if (previousBid) {
+          await prisma.$transaction(async (tx) => {
+            await tx.user.update({
+              where: { id: previousBid.userId },
+              data: { points: { increment: previousBid.amount } }
+            });
+            await tx.pointTransaction.create({
+              data: {
+                userId: previousBid.userId,
+                amount: previousBid.amount,
+                reason: 'REFUND_RESET'
+              }
+            });
+            // 2. 해당 아이템의 모든 입찰 기록 삭제
+            await tx.bid.deleteMany({ where: { itemId: activeItem.id } });
+            
+            // 3. 아이템 시작 시간 갱신
+            await tx.item.update({
+              where: { id: activeItem.id },
+              data: { startTime: new Date() }
+            });
+          });
+        }
+
+        // 4. 타이머 초기화 및 재시작
+        roomTimerPaused.set(roomId, false);
+        startItemTimer(io, roomId, activeItem.id, activeItem.timerDuration);
+
+        io.to(roomId).emit('item_reset', {
+          activeItem: { ...activeItem, currentHighest: activeItem.startingPrice, totalBids: 0 },
+          remainingTime: activeItem.timerDuration
+        });
+      } catch (err) {
+        console.error('reset_item error:', err);
       }
     });
 
@@ -296,6 +380,11 @@ function startItemTimer(io: Server, roomId: string, itemId: string, durationSeco
   roomTimerState.set(roomId, durationSeconds);
 
   const interval = setInterval(async () => {
+    // 일시정지 상태면 초를 줄이지 않음
+    if (roomTimerPaused.get(roomId)) {
+      return;
+    }
+
     const remaining = (roomTimerState.get(roomId) ?? 0) - 1;
     roomTimerState.set(roomId, remaining);
 
@@ -305,6 +394,7 @@ function startItemTimer(io: Server, roomId: string, itemId: string, durationSeco
       clearInterval(interval);
       roomTimers.delete(roomId);
       roomTimerState.delete(roomId);
+      roomTimerPaused.delete(roomId);
 
       // 낙찰/유찰 처리
       await finalizeItem(io, roomId, itemId);
