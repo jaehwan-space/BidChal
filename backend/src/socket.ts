@@ -337,7 +337,7 @@ export function setupSockets(io: Server) {
               data: {
                 userId: previousBid.userId,
                 amount: previousBid.amount,
-                reason: 'REFUND_RESET'
+                reason: 'REFUND'
               }
             });
             // 2. 해당 아이템의 모든 입찰 기록 삭제
