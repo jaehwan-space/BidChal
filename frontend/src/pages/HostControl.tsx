@@ -13,7 +13,7 @@ export function HostControl() {
   const { id: roomId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { data: room, isLoading, isError, refetch } = useRoom(roomId);
+  const { data: room, isLoading, isError } = useRoom(roomId);
   const { socket, isConnected, connect } = useSocketStore();
 
   const [phase, setPhase] = useState<AuctionPhase>('waiting');
@@ -22,6 +22,8 @@ export function HostControl() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
   const [lastBidderName, setLastBidderName] = useState<string | null>(null);
+
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => { connect(); }, [connect]);
 
@@ -43,6 +45,7 @@ export function HostControl() {
         setRemainingTime(data.remainingTime);
         setCurrentIndex(data.currentIndex);
         setTotalItems(data.totalItems);
+        setIsPaused(Boolean(data.isPaused));
         
         if (data.activeItem.bids && data.activeItem.bids.length > 0 && data.activeItem.bids[0].user) {
           setLastBidderName(data.activeItem.bids[0].user.username);
@@ -68,6 +71,7 @@ export function HostControl() {
       setRemainingTime(data.remainingTime);
       setCurrentIndex(data.currentIndex);
       setTotalItems(data.totalItems);
+      setIsPaused(false);
       setLastBidderName(null);
       setPhase('active');
     };
@@ -77,6 +81,7 @@ export function HostControl() {
       setRemainingTime(data.remainingTime);
       setCurrentIndex(data.currentIndex);
       setTotalItems(data.totalItems);
+      setIsPaused(false);
       setLastBidderName(null);
       setPhase('active');
     };
@@ -85,31 +90,39 @@ export function HostControl() {
       setRemainingTime(data.remainingTime);
     };
 
+    const handleTimerPaused = (data: { isPaused: boolean }) => {
+      setIsPaused(data.isPaused);
+    };
+
+    const handleItemReset = (data: any) => {
+      setActiveItem(data.activeItem);
+      setRemainingTime(data.remainingTime);
+      setLastBidderName(null);
+      setIsPaused(false);
+      setPhase('active');
+    };
+
     const handleUpdateBid = (data: any) => {
-      setActiveItem(prev => {
-        if (!prev || prev.id !== data.itemId) return prev;
-        return { ...prev, currentHighest: data.newAmount, totalBids: data.totalBids };
-      });
-      setLastBidderName(data.lastBidderName || null);
+      setActiveItem(prev => prev ? {
+        ...prev,
+        currentHighest: data.amount,
+        totalBids: data.totalBids
+      } : null);
+      if (data.lastBidderName) {
+        setLastBidderName(data.lastBidderName);
+      }
     };
 
-    const handleItemSold = () => {
-      setPhase('sold');
-    };
-
-    const handleItemPassed = () => {
-      setPhase('passed');
-    };
-
-    const handleAuctionEnded = () => {
-      setPhase('ended');
-      refetch();
-    };
+    const handleItemSold = () => { setPhase('sold'); };
+    const handleItemPassed = () => { setPhase('passed'); };
+    const handleAuctionEnded = () => { setPhase('ended'); };
 
     socket.on('room_state', handleRoomState);
     socket.on('auction_started', handleAuctionStarted);
     socket.on('item_active', handleItemActive);
     socket.on('timer_tick', handleTimerTick);
+    socket.on('timer_paused', handleTimerPaused);
+    socket.on('item_reset', handleItemReset);
     socket.on('update_bid', handleUpdateBid);
     socket.on('item_sold', handleItemSold);
     socket.on('item_passed', handleItemPassed);
@@ -120,28 +133,39 @@ export function HostControl() {
       socket.off('auction_started', handleAuctionStarted);
       socket.off('item_active', handleItemActive);
       socket.off('timer_tick', handleTimerTick);
+      socket.off('timer_paused', handleTimerPaused);
+      socket.off('item_reset', handleItemReset);
       socket.off('update_bid', handleUpdateBid);
       socket.off('item_sold', handleItemSold);
       socket.off('item_passed', handleItemPassed);
       socket.off('auction_ended', handleAuctionEnded);
     };
-  }, [socket, isConnected, roomId, refetch]);
+  }, [socket, isConnected, roomId]);
 
   const handleStartAuction = () => {
-    if (socket && isConnected) {
-      socket.emit('start_auction', { roomId, hostId: user?.id });
-    }
+    if (!socket || !roomId || !user) return;
+    socket.emit('start_auction', { roomId, hostId: user.id });
   };
 
   const handleNextItem = () => {
-    if (socket && isConnected) {
-      socket.emit('next_item', { roomId, hostId: user?.id });
-    }
+    if (!socket || !roomId || !user) return;
+    socket.emit('next_item', { roomId, hostId: user.id });
   };
 
-  const handleExtendTimer = () => {
-    if (socket && isConnected) {
-      socket.emit('extend_timer', { roomId, hostId: user?.id });
+  const handleAdjustTimer = (delta: number) => {
+    if (!socket || !roomId || !user) return;
+    socket.emit('adjust_timer', { roomId, hostId: user.id, delta });
+  };
+
+  const togglePause = () => {
+    if (!socket || !roomId || !user) return;
+    socket.emit(isPaused ? 'resume_timer' : 'pause_timer', { roomId, hostId: user.id });
+  };
+
+  const handleResetItem = () => {
+    if (!socket || !roomId || !user) return;
+    if (window.confirm('정말 이 경매를 초기화하시겠습니까? 현재까지의 입찰이 모두 취소 및 환불됩니다.')) {
+      socket.emit('reset_item', { roomId, hostId: user.id });
     }
   };
 
@@ -237,9 +261,22 @@ export function HostControl() {
             </div>
           </Card>
 
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <Button variant="primary" onClick={handleExtendTimer} style={{ flex: 1, padding: '14px' }}>
-              ⏱️ +10초 연장
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+            <Button variant="secondary" onClick={() => handleAdjustTimer(-10)}>-10초</Button>
+            <Button variant="secondary" onClick={() => handleAdjustTimer(-5)}>-5초</Button>
+            <Button variant="secondary" onClick={() => handleAdjustTimer(-1)}>-1초</Button>
+
+            <Button variant="primary" onClick={() => handleAdjustTimer(10)}>+10초</Button>
+            <Button variant="primary" onClick={() => handleAdjustTimer(5)}>+5초</Button>
+            <Button variant="primary" onClick={() => handleAdjustTimer(1)}>+1초</Button>
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Button variant="secondary" onClick={togglePause} style={{ flex: 1, padding: '14px', background: isPaused ? 'var(--success)' : undefined }}>
+              {isPaused ? '▶️ 타이머 재개' : '⏸️ 타이머 일시정지'}
+            </Button>
+            <Button variant="secondary" onClick={handleResetItem} style={{ flex: 1, padding: '14px', background: 'var(--danger)', color: 'white' }}>
+              🔄 이 경매 초기화
             </Button>
           </div>
         </>
