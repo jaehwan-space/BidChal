@@ -7,7 +7,7 @@ const router = Router({ mergeParams: true });
 router.post('/', async (req, res) => {
   try {
     const { roomId } = req.params as { roomId: string };
-    const { name, description, startingPrice, auctionType, imageUrl } = req.body;
+    const { name, description, startingPrice, auctionType, imageUrl, timerDuration } = req.body;
 
     if (!name || !startingPrice || !auctionType) {
       return res.status(400).json({ error: 'name, startingPrice, auctionType are required' });
@@ -20,7 +20,8 @@ router.post('/', async (req, res) => {
         description,
         startingPrice,
         auctionType, // 'OPEN' or 'BLIND'
-        imageUrl
+        imageUrl,
+        timerDuration: timerDuration || 30
       }
     });
 

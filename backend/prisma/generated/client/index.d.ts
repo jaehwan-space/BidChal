@@ -43,7 +43,16 @@ export type PointTransaction = $Result.DefaultSelection<Prisma.$PointTransaction
  * Enums
  */
 export namespace $Enums {
-  export const AuctionType: {
+  export const RoomStatus: {
+  WAITING: 'WAITING',
+  ACTIVE: 'ACTIVE',
+  FINISHED: 'FINISHED'
+};
+
+export type RoomStatus = (typeof RoomStatus)[keyof typeof RoomStatus]
+
+
+export const AuctionType: {
   OPEN: 'OPEN',
   BLIND: 'BLIND'
 };
@@ -71,6 +80,10 @@ export const TransactionReason: {
 export type TransactionReason = (typeof TransactionReason)[keyof typeof TransactionReason]
 
 }
+
+export type RoomStatus = $Enums.RoomStatus
+
+export const RoomStatus: typeof $Enums.RoomStatus
 
 export type AuctionType = $Enums.AuctionType
 
@@ -2398,6 +2411,8 @@ export namespace Prisma {
     id: string | null
     title: string | null
     hostId: string | null
+    status: $Enums.RoomStatus | null
+    activeItemId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -2406,6 +2421,8 @@ export namespace Prisma {
     id: string | null
     title: string | null
     hostId: string | null
+    status: $Enums.RoomStatus | null
+    activeItemId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -2414,6 +2431,8 @@ export namespace Prisma {
     id: number
     title: number
     hostId: number
+    status: number
+    activeItemId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -2424,6 +2443,8 @@ export namespace Prisma {
     id?: true
     title?: true
     hostId?: true
+    status?: true
+    activeItemId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -2432,6 +2453,8 @@ export namespace Prisma {
     id?: true
     title?: true
     hostId?: true
+    status?: true
+    activeItemId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -2440,6 +2463,8 @@ export namespace Prisma {
     id?: true
     title?: true
     hostId?: true
+    status?: true
+    activeItemId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -2521,6 +2546,8 @@ export namespace Prisma {
     id: string
     title: string
     hostId: string
+    status: $Enums.RoomStatus
+    activeItemId: string | null
     createdAt: Date
     updatedAt: Date
     _count: RoomCountAggregateOutputType | null
@@ -2546,6 +2573,8 @@ export namespace Prisma {
     id?: boolean
     title?: boolean
     hostId?: boolean
+    status?: boolean
+    activeItemId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     host?: boolean | UserDefaultArgs<ExtArgs>
@@ -2557,6 +2586,8 @@ export namespace Prisma {
     id?: boolean
     title?: boolean
     hostId?: boolean
+    status?: boolean
+    activeItemId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     host?: boolean | UserDefaultArgs<ExtArgs>
@@ -2566,6 +2597,8 @@ export namespace Prisma {
     id?: boolean
     title?: boolean
     hostId?: boolean
+    status?: boolean
+    activeItemId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
@@ -2589,6 +2622,8 @@ export namespace Prisma {
       id: string
       title: string
       hostId: string
+      status: $Enums.RoomStatus
+      activeItemId: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["room"]>
@@ -2989,6 +3024,8 @@ export namespace Prisma {
     readonly id: FieldRef<"Room", 'String'>
     readonly title: FieldRef<"Room", 'String'>
     readonly hostId: FieldRef<"Room", 'String'>
+    readonly status: FieldRef<"Room", 'RoomStatus'>
+    readonly activeItemId: FieldRef<"Room", 'String'>
     readonly createdAt: FieldRef<"Room", 'DateTime'>
     readonly updatedAt: FieldRef<"Room", 'DateTime'>
   }
@@ -3357,10 +3394,14 @@ export namespace Prisma {
 
   export type ItemAvgAggregateOutputType = {
     startingPrice: number | null
+    timerDuration: number | null
+    finalPrice: number | null
   }
 
   export type ItemSumAggregateOutputType = {
     startingPrice: number | null
+    timerDuration: number | null
+    finalPrice: number | null
   }
 
   export type ItemMinAggregateOutputType = {
@@ -3371,7 +3412,10 @@ export namespace Prisma {
     imageUrl: string | null
     startingPrice: number | null
     auctionType: $Enums.AuctionType | null
+    timerDuration: number | null
     status: $Enums.ItemStatus | null
+    winnerId: string | null
+    finalPrice: number | null
     startTime: Date | null
     endTime: Date | null
     createdAt: Date | null
@@ -3386,7 +3430,10 @@ export namespace Prisma {
     imageUrl: string | null
     startingPrice: number | null
     auctionType: $Enums.AuctionType | null
+    timerDuration: number | null
     status: $Enums.ItemStatus | null
+    winnerId: string | null
+    finalPrice: number | null
     startTime: Date | null
     endTime: Date | null
     createdAt: Date | null
@@ -3401,7 +3448,10 @@ export namespace Prisma {
     imageUrl: number
     startingPrice: number
     auctionType: number
+    timerDuration: number
     status: number
+    winnerId: number
+    finalPrice: number
     startTime: number
     endTime: number
     createdAt: number
@@ -3412,10 +3462,14 @@ export namespace Prisma {
 
   export type ItemAvgAggregateInputType = {
     startingPrice?: true
+    timerDuration?: true
+    finalPrice?: true
   }
 
   export type ItemSumAggregateInputType = {
     startingPrice?: true
+    timerDuration?: true
+    finalPrice?: true
   }
 
   export type ItemMinAggregateInputType = {
@@ -3426,7 +3480,10 @@ export namespace Prisma {
     imageUrl?: true
     startingPrice?: true
     auctionType?: true
+    timerDuration?: true
     status?: true
+    winnerId?: true
+    finalPrice?: true
     startTime?: true
     endTime?: true
     createdAt?: true
@@ -3441,7 +3498,10 @@ export namespace Prisma {
     imageUrl?: true
     startingPrice?: true
     auctionType?: true
+    timerDuration?: true
     status?: true
+    winnerId?: true
+    finalPrice?: true
     startTime?: true
     endTime?: true
     createdAt?: true
@@ -3456,7 +3516,10 @@ export namespace Prisma {
     imageUrl?: true
     startingPrice?: true
     auctionType?: true
+    timerDuration?: true
     status?: true
+    winnerId?: true
+    finalPrice?: true
     startTime?: true
     endTime?: true
     createdAt?: true
@@ -3558,7 +3621,10 @@ export namespace Prisma {
     imageUrl: string | null
     startingPrice: number
     auctionType: $Enums.AuctionType
+    timerDuration: number
     status: $Enums.ItemStatus
+    winnerId: string | null
+    finalPrice: number | null
     startTime: Date | null
     endTime: Date | null
     createdAt: Date
@@ -3592,7 +3658,10 @@ export namespace Prisma {
     imageUrl?: boolean
     startingPrice?: boolean
     auctionType?: boolean
+    timerDuration?: boolean
     status?: boolean
+    winnerId?: boolean
+    finalPrice?: boolean
     startTime?: boolean
     endTime?: boolean
     createdAt?: boolean
@@ -3610,7 +3679,10 @@ export namespace Prisma {
     imageUrl?: boolean
     startingPrice?: boolean
     auctionType?: boolean
+    timerDuration?: boolean
     status?: boolean
+    winnerId?: boolean
+    finalPrice?: boolean
     startTime?: boolean
     endTime?: boolean
     createdAt?: boolean
@@ -3626,7 +3698,10 @@ export namespace Prisma {
     imageUrl?: boolean
     startingPrice?: boolean
     auctionType?: boolean
+    timerDuration?: boolean
     status?: boolean
+    winnerId?: boolean
+    finalPrice?: boolean
     startTime?: boolean
     endTime?: boolean
     createdAt?: boolean
@@ -3656,7 +3731,10 @@ export namespace Prisma {
       imageUrl: string | null
       startingPrice: number
       auctionType: $Enums.AuctionType
+      timerDuration: number
       status: $Enums.ItemStatus
+      winnerId: string | null
+      finalPrice: number | null
       startTime: Date | null
       endTime: Date | null
       createdAt: Date
@@ -4063,7 +4141,10 @@ export namespace Prisma {
     readonly imageUrl: FieldRef<"Item", 'String'>
     readonly startingPrice: FieldRef<"Item", 'Int'>
     readonly auctionType: FieldRef<"Item", 'AuctionType'>
+    readonly timerDuration: FieldRef<"Item", 'Int'>
     readonly status: FieldRef<"Item", 'ItemStatus'>
+    readonly winnerId: FieldRef<"Item", 'String'>
+    readonly finalPrice: FieldRef<"Item", 'Int'>
     readonly startTime: FieldRef<"Item", 'DateTime'>
     readonly endTime: FieldRef<"Item", 'DateTime'>
     readonly createdAt: FieldRef<"Item", 'DateTime'>
@@ -6390,6 +6471,8 @@ export namespace Prisma {
     id: 'id',
     title: 'title',
     hostId: 'hostId',
+    status: 'status',
+    activeItemId: 'activeItemId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -6405,7 +6488,10 @@ export namespace Prisma {
     imageUrl: 'imageUrl',
     startingPrice: 'startingPrice',
     auctionType: 'auctionType',
+    timerDuration: 'timerDuration',
     status: 'status',
+    winnerId: 'winnerId',
+    finalPrice: 'finalPrice',
     startTime: 'startTime',
     endTime: 'endTime',
     createdAt: 'createdAt',
@@ -6505,6 +6591,20 @@ export namespace Prisma {
    * Reference to a field of type 'DateTime[]'
    */
   export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'RoomStatus'
+   */
+  export type EnumRoomStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RoomStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'RoomStatus[]'
+   */
+  export type ListEnumRoomStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RoomStatus[]'>
     
 
 
@@ -6642,6 +6742,8 @@ export namespace Prisma {
     id?: StringFilter<"Room"> | string
     title?: StringFilter<"Room"> | string
     hostId?: StringFilter<"Room"> | string
+    status?: EnumRoomStatusFilter<"Room"> | $Enums.RoomStatus
+    activeItemId?: StringNullableFilter<"Room"> | string | null
     createdAt?: DateTimeFilter<"Room"> | Date | string
     updatedAt?: DateTimeFilter<"Room"> | Date | string
     host?: XOR<UserRelationFilter, UserWhereInput>
@@ -6652,6 +6754,8 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     hostId?: SortOrder
+    status?: SortOrder
+    activeItemId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     host?: UserOrderByWithRelationInput
@@ -6665,6 +6769,8 @@ export namespace Prisma {
     NOT?: RoomWhereInput | RoomWhereInput[]
     title?: StringFilter<"Room"> | string
     hostId?: StringFilter<"Room"> | string
+    status?: EnumRoomStatusFilter<"Room"> | $Enums.RoomStatus
+    activeItemId?: StringNullableFilter<"Room"> | string | null
     createdAt?: DateTimeFilter<"Room"> | Date | string
     updatedAt?: DateTimeFilter<"Room"> | Date | string
     host?: XOR<UserRelationFilter, UserWhereInput>
@@ -6675,6 +6781,8 @@ export namespace Prisma {
     id?: SortOrder
     title?: SortOrder
     hostId?: SortOrder
+    status?: SortOrder
+    activeItemId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: RoomCountOrderByAggregateInput
@@ -6689,6 +6797,8 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Room"> | string
     title?: StringWithAggregatesFilter<"Room"> | string
     hostId?: StringWithAggregatesFilter<"Room"> | string
+    status?: EnumRoomStatusWithAggregatesFilter<"Room"> | $Enums.RoomStatus
+    activeItemId?: StringNullableWithAggregatesFilter<"Room"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Room"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Room"> | Date | string
   }
@@ -6704,7 +6814,10 @@ export namespace Prisma {
     imageUrl?: StringNullableFilter<"Item"> | string | null
     startingPrice?: IntFilter<"Item"> | number
     auctionType?: EnumAuctionTypeFilter<"Item"> | $Enums.AuctionType
+    timerDuration?: IntFilter<"Item"> | number
     status?: EnumItemStatusFilter<"Item"> | $Enums.ItemStatus
+    winnerId?: StringNullableFilter<"Item"> | string | null
+    finalPrice?: IntNullableFilter<"Item"> | number | null
     startTime?: DateTimeNullableFilter<"Item"> | Date | string | null
     endTime?: DateTimeNullableFilter<"Item"> | Date | string | null
     createdAt?: DateTimeFilter<"Item"> | Date | string
@@ -6721,7 +6834,10 @@ export namespace Prisma {
     imageUrl?: SortOrderInput | SortOrder
     startingPrice?: SortOrder
     auctionType?: SortOrder
+    timerDuration?: SortOrder
     status?: SortOrder
+    winnerId?: SortOrderInput | SortOrder
+    finalPrice?: SortOrderInput | SortOrder
     startTime?: SortOrderInput | SortOrder
     endTime?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -6741,7 +6857,10 @@ export namespace Prisma {
     imageUrl?: StringNullableFilter<"Item"> | string | null
     startingPrice?: IntFilter<"Item"> | number
     auctionType?: EnumAuctionTypeFilter<"Item"> | $Enums.AuctionType
+    timerDuration?: IntFilter<"Item"> | number
     status?: EnumItemStatusFilter<"Item"> | $Enums.ItemStatus
+    winnerId?: StringNullableFilter<"Item"> | string | null
+    finalPrice?: IntNullableFilter<"Item"> | number | null
     startTime?: DateTimeNullableFilter<"Item"> | Date | string | null
     endTime?: DateTimeNullableFilter<"Item"> | Date | string | null
     createdAt?: DateTimeFilter<"Item"> | Date | string
@@ -6758,7 +6877,10 @@ export namespace Prisma {
     imageUrl?: SortOrderInput | SortOrder
     startingPrice?: SortOrder
     auctionType?: SortOrder
+    timerDuration?: SortOrder
     status?: SortOrder
+    winnerId?: SortOrderInput | SortOrder
+    finalPrice?: SortOrderInput | SortOrder
     startTime?: SortOrderInput | SortOrder
     endTime?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -6781,7 +6903,10 @@ export namespace Prisma {
     imageUrl?: StringNullableWithAggregatesFilter<"Item"> | string | null
     startingPrice?: IntWithAggregatesFilter<"Item"> | number
     auctionType?: EnumAuctionTypeWithAggregatesFilter<"Item"> | $Enums.AuctionType
+    timerDuration?: IntWithAggregatesFilter<"Item"> | number
     status?: EnumItemStatusWithAggregatesFilter<"Item"> | $Enums.ItemStatus
+    winnerId?: StringNullableWithAggregatesFilter<"Item"> | string | null
+    finalPrice?: IntNullableWithAggregatesFilter<"Item"> | number | null
     startTime?: DateTimeNullableWithAggregatesFilter<"Item"> | Date | string | null
     endTime?: DateTimeNullableWithAggregatesFilter<"Item"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Item"> | Date | string
@@ -6983,6 +7108,8 @@ export namespace Prisma {
   export type RoomCreateInput = {
     id?: string
     title: string
+    status?: $Enums.RoomStatus
+    activeItemId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     host: UserCreateNestedOneWithoutRoomsInput
@@ -6993,6 +7120,8 @@ export namespace Prisma {
     id?: string
     title: string
     hostId: string
+    status?: $Enums.RoomStatus
+    activeItemId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     items?: ItemUncheckedCreateNestedManyWithoutRoomInput
@@ -7001,6 +7130,8 @@ export namespace Prisma {
   export type RoomUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    activeItemId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     host?: UserUpdateOneRequiredWithoutRoomsNestedInput
@@ -7011,6 +7142,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     hostId?: StringFieldUpdateOperationsInput | string
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    activeItemId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     items?: ItemUncheckedUpdateManyWithoutRoomNestedInput
@@ -7020,6 +7153,8 @@ export namespace Prisma {
     id?: string
     title: string
     hostId: string
+    status?: $Enums.RoomStatus
+    activeItemId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -7027,6 +7162,8 @@ export namespace Prisma {
   export type RoomUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    activeItemId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -7035,6 +7172,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     hostId?: StringFieldUpdateOperationsInput | string
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    activeItemId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -7046,7 +7185,10 @@ export namespace Prisma {
     imageUrl?: string | null
     startingPrice: number
     auctionType: $Enums.AuctionType
+    timerDuration?: number
     status?: $Enums.ItemStatus
+    winnerId?: string | null
+    finalPrice?: number | null
     startTime?: Date | string | null
     endTime?: Date | string | null
     createdAt?: Date | string
@@ -7063,7 +7205,10 @@ export namespace Prisma {
     imageUrl?: string | null
     startingPrice: number
     auctionType: $Enums.AuctionType
+    timerDuration?: number
     status?: $Enums.ItemStatus
+    winnerId?: string | null
+    finalPrice?: number | null
     startTime?: Date | string | null
     endTime?: Date | string | null
     createdAt?: Date | string
@@ -7078,7 +7223,10 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     startingPrice?: IntFieldUpdateOperationsInput | number
     auctionType?: EnumAuctionTypeFieldUpdateOperationsInput | $Enums.AuctionType
+    timerDuration?: IntFieldUpdateOperationsInput | number
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
+    winnerId?: NullableStringFieldUpdateOperationsInput | string | null
+    finalPrice?: NullableIntFieldUpdateOperationsInput | number | null
     startTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7095,7 +7243,10 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     startingPrice?: IntFieldUpdateOperationsInput | number
     auctionType?: EnumAuctionTypeFieldUpdateOperationsInput | $Enums.AuctionType
+    timerDuration?: IntFieldUpdateOperationsInput | number
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
+    winnerId?: NullableStringFieldUpdateOperationsInput | string | null
+    finalPrice?: NullableIntFieldUpdateOperationsInput | number | null
     startTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7111,7 +7262,10 @@ export namespace Prisma {
     imageUrl?: string | null
     startingPrice: number
     auctionType: $Enums.AuctionType
+    timerDuration?: number
     status?: $Enums.ItemStatus
+    winnerId?: string | null
+    finalPrice?: number | null
     startTime?: Date | string | null
     endTime?: Date | string | null
     createdAt?: Date | string
@@ -7125,7 +7279,10 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     startingPrice?: IntFieldUpdateOperationsInput | number
     auctionType?: EnumAuctionTypeFieldUpdateOperationsInput | $Enums.AuctionType
+    timerDuration?: IntFieldUpdateOperationsInput | number
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
+    winnerId?: NullableStringFieldUpdateOperationsInput | string | null
+    finalPrice?: NullableIntFieldUpdateOperationsInput | number | null
     startTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7140,7 +7297,10 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     startingPrice?: IntFieldUpdateOperationsInput | number
     auctionType?: EnumAuctionTypeFieldUpdateOperationsInput | $Enums.AuctionType
+    timerDuration?: IntFieldUpdateOperationsInput | number
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
+    winnerId?: NullableStringFieldUpdateOperationsInput | string | null
+    finalPrice?: NullableIntFieldUpdateOperationsInput | number | null
     startTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7406,43 +7566,11 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
-  export type UserRelationFilter = {
-    is?: UserWhereInput
-    isNot?: UserWhereInput
-  }
-
-  export type ItemListRelationFilter = {
-    every?: ItemWhereInput
-    some?: ItemWhereInput
-    none?: ItemWhereInput
-  }
-
-  export type ItemOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type RoomCountOrderByAggregateInput = {
-    id?: SortOrder
-    title?: SortOrder
-    hostId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type RoomMaxOrderByAggregateInput = {
-    id?: SortOrder
-    title?: SortOrder
-    hostId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type RoomMinOrderByAggregateInput = {
-    id?: SortOrder
-    title?: SortOrder
-    hostId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
+  export type EnumRoomStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.RoomStatus | EnumRoomStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RoomStatus[] | ListEnumRoomStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RoomStatus[] | ListEnumRoomStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRoomStatusFilter<$PrismaModel> | $Enums.RoomStatus
   }
 
   export type StringNullableFilter<$PrismaModel = never> = {
@@ -7460,34 +7588,15 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
-  export type EnumAuctionTypeFilter<$PrismaModel = never> = {
-    equals?: $Enums.AuctionType | EnumAuctionTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.AuctionType[] | ListEnumAuctionTypeFieldRefInput<$PrismaModel>
-    notIn?: $Enums.AuctionType[] | ListEnumAuctionTypeFieldRefInput<$PrismaModel>
-    not?: NestedEnumAuctionTypeFilter<$PrismaModel> | $Enums.AuctionType
+  export type UserRelationFilter = {
+    is?: UserWhereInput
+    isNot?: UserWhereInput
   }
 
-  export type EnumItemStatusFilter<$PrismaModel = never> = {
-    equals?: $Enums.ItemStatus | EnumItemStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.ItemStatus[] | ListEnumItemStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.ItemStatus[] | ListEnumItemStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumItemStatusFilter<$PrismaModel> | $Enums.ItemStatus
-  }
-
-  export type DateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
-  }
-
-  export type RoomRelationFilter = {
-    is?: RoomWhereInput
-    isNot?: RoomWhereInput
+  export type ItemListRelationFilter = {
+    every?: ItemWhereInput
+    some?: ItemWhereInput
+    none?: ItemWhereInput
   }
 
   export type SortOrderInput = {
@@ -7495,57 +7604,48 @@ export namespace Prisma {
     nulls?: NullsOrder
   }
 
-  export type ItemCountOrderByAggregateInput = {
+  export type ItemOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type RoomCountOrderByAggregateInput = {
     id?: SortOrder
-    roomId?: SortOrder
-    name?: SortOrder
-    description?: SortOrder
-    imageUrl?: SortOrder
-    startingPrice?: SortOrder
-    auctionType?: SortOrder
+    title?: SortOrder
+    hostId?: SortOrder
     status?: SortOrder
-    startTime?: SortOrder
-    endTime?: SortOrder
+    activeItemId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
-  export type ItemAvgOrderByAggregateInput = {
-    startingPrice?: SortOrder
-  }
-
-  export type ItemMaxOrderByAggregateInput = {
+  export type RoomMaxOrderByAggregateInput = {
     id?: SortOrder
-    roomId?: SortOrder
-    name?: SortOrder
-    description?: SortOrder
-    imageUrl?: SortOrder
-    startingPrice?: SortOrder
-    auctionType?: SortOrder
+    title?: SortOrder
+    hostId?: SortOrder
     status?: SortOrder
-    startTime?: SortOrder
-    endTime?: SortOrder
+    activeItemId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
-  export type ItemMinOrderByAggregateInput = {
+  export type RoomMinOrderByAggregateInput = {
     id?: SortOrder
-    roomId?: SortOrder
-    name?: SortOrder
-    description?: SortOrder
-    imageUrl?: SortOrder
-    startingPrice?: SortOrder
-    auctionType?: SortOrder
+    title?: SortOrder
+    hostId?: SortOrder
     status?: SortOrder
-    startTime?: SortOrder
-    endTime?: SortOrder
+    activeItemId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
-  export type ItemSumOrderByAggregateInput = {
-    startingPrice?: SortOrder
+  export type EnumRoomStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.RoomStatus | EnumRoomStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RoomStatus[] | ListEnumRoomStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RoomStatus[] | ListEnumRoomStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRoomStatusWithAggregatesFilter<$PrismaModel> | $Enums.RoomStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRoomStatusFilter<$PrismaModel>
+    _max?: NestedEnumRoomStatusFilter<$PrismaModel>
   }
 
   export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -7566,6 +7666,113 @@ export namespace Prisma {
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
+  export type EnumAuctionTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.AuctionType | EnumAuctionTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.AuctionType[] | ListEnumAuctionTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.AuctionType[] | ListEnumAuctionTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumAuctionTypeFilter<$PrismaModel> | $Enums.AuctionType
+  }
+
+  export type EnumItemStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ItemStatus | EnumItemStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ItemStatus[] | ListEnumItemStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ItemStatus[] | ListEnumItemStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumItemStatusFilter<$PrismaModel> | $Enums.ItemStatus
+  }
+
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type RoomRelationFilter = {
+    is?: RoomWhereInput
+    isNot?: RoomWhereInput
+  }
+
+  export type ItemCountOrderByAggregateInput = {
+    id?: SortOrder
+    roomId?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
+    imageUrl?: SortOrder
+    startingPrice?: SortOrder
+    auctionType?: SortOrder
+    timerDuration?: SortOrder
+    status?: SortOrder
+    winnerId?: SortOrder
+    finalPrice?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ItemAvgOrderByAggregateInput = {
+    startingPrice?: SortOrder
+    timerDuration?: SortOrder
+    finalPrice?: SortOrder
+  }
+
+  export type ItemMaxOrderByAggregateInput = {
+    id?: SortOrder
+    roomId?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
+    imageUrl?: SortOrder
+    startingPrice?: SortOrder
+    auctionType?: SortOrder
+    timerDuration?: SortOrder
+    status?: SortOrder
+    winnerId?: SortOrder
+    finalPrice?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ItemMinOrderByAggregateInput = {
+    id?: SortOrder
+    roomId?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
+    imageUrl?: SortOrder
+    startingPrice?: SortOrder
+    auctionType?: SortOrder
+    timerDuration?: SortOrder
+    status?: SortOrder
+    winnerId?: SortOrder
+    finalPrice?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ItemSumOrderByAggregateInput = {
+    startingPrice?: SortOrder
+    timerDuration?: SortOrder
+    finalPrice?: SortOrder
+  }
+
   export type EnumAuctionTypeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.AuctionType | EnumAuctionTypeFieldRefInput<$PrismaModel>
     in?: $Enums.AuctionType[] | ListEnumAuctionTypeFieldRefInput<$PrismaModel>
@@ -7584,6 +7791,22 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumItemStatusFilter<$PrismaModel>
     _max?: NestedEnumItemStatusFilter<$PrismaModel>
+  }
+
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -7848,6 +8071,14 @@ export namespace Prisma {
     connect?: ItemWhereUniqueInput | ItemWhereUniqueInput[]
   }
 
+  export type EnumRoomStatusFieldUpdateOperationsInput = {
+    set?: $Enums.RoomStatus
+  }
+
+  export type NullableStringFieldUpdateOperationsInput = {
+    set?: string | null
+  }
+
   export type UserUpdateOneRequiredWithoutRoomsNestedInput = {
     create?: XOR<UserCreateWithoutRoomsInput, UserUncheckedCreateWithoutRoomsInput>
     connectOrCreate?: UserCreateOrConnectWithoutRoomsInput
@@ -7904,16 +8135,20 @@ export namespace Prisma {
     connect?: BidWhereUniqueInput | BidWhereUniqueInput[]
   }
 
-  export type NullableStringFieldUpdateOperationsInput = {
-    set?: string | null
-  }
-
   export type EnumAuctionTypeFieldUpdateOperationsInput = {
     set?: $Enums.AuctionType
   }
 
   export type EnumItemStatusFieldUpdateOperationsInput = {
     set?: $Enums.ItemStatus
+  }
+
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
   }
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -8096,6 +8331,13 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type NestedEnumRoomStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.RoomStatus | EnumRoomStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RoomStatus[] | ListEnumRoomStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RoomStatus[] | ListEnumRoomStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRoomStatusFilter<$PrismaModel> | $Enums.RoomStatus
+  }
+
   export type NestedStringNullableFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -8110,29 +8352,14 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
-  export type NestedEnumAuctionTypeFilter<$PrismaModel = never> = {
-    equals?: $Enums.AuctionType | EnumAuctionTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.AuctionType[] | ListEnumAuctionTypeFieldRefInput<$PrismaModel>
-    notIn?: $Enums.AuctionType[] | ListEnumAuctionTypeFieldRefInput<$PrismaModel>
-    not?: NestedEnumAuctionTypeFilter<$PrismaModel> | $Enums.AuctionType
-  }
-
-  export type NestedEnumItemStatusFilter<$PrismaModel = never> = {
-    equals?: $Enums.ItemStatus | EnumItemStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.ItemStatus[] | ListEnumItemStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.ItemStatus[] | ListEnumItemStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumItemStatusFilter<$PrismaModel> | $Enums.ItemStatus
-  }
-
-  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  export type NestedEnumRoomStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.RoomStatus | EnumRoomStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RoomStatus[] | ListEnumRoomStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RoomStatus[] | ListEnumRoomStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRoomStatusWithAggregatesFilter<$PrismaModel> | $Enums.RoomStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRoomStatusFilter<$PrismaModel>
+    _max?: NestedEnumRoomStatusFilter<$PrismaModel>
   }
 
   export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -8163,6 +8390,31 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
+  export type NestedEnumAuctionTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.AuctionType | EnumAuctionTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.AuctionType[] | ListEnumAuctionTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.AuctionType[] | ListEnumAuctionTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumAuctionTypeFilter<$PrismaModel> | $Enums.AuctionType
+  }
+
+  export type NestedEnumItemStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ItemStatus | EnumItemStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ItemStatus[] | ListEnumItemStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ItemStatus[] | ListEnumItemStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumItemStatusFilter<$PrismaModel> | $Enums.ItemStatus
+  }
+
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type NestedEnumAuctionTypeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.AuctionType | EnumAuctionTypeFieldRefInput<$PrismaModel>
     in?: $Enums.AuctionType[] | ListEnumAuctionTypeFieldRefInput<$PrismaModel>
@@ -8181,6 +8433,33 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumItemStatusFilter<$PrismaModel>
     _max?: NestedEnumItemStatusFilter<$PrismaModel>
+  }
+
+  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
   export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -8217,6 +8496,8 @@ export namespace Prisma {
   export type RoomCreateWithoutHostInput = {
     id?: string
     title: string
+    status?: $Enums.RoomStatus
+    activeItemId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     items?: ItemCreateNestedManyWithoutRoomInput
@@ -8225,6 +8506,8 @@ export namespace Prisma {
   export type RoomUncheckedCreateWithoutHostInput = {
     id?: string
     title: string
+    status?: $Enums.RoomStatus
+    activeItemId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     items?: ItemUncheckedCreateNestedManyWithoutRoomInput
@@ -8311,6 +8594,8 @@ export namespace Prisma {
     id?: StringFilter<"Room"> | string
     title?: StringFilter<"Room"> | string
     hostId?: StringFilter<"Room"> | string
+    status?: EnumRoomStatusFilter<"Room"> | $Enums.RoomStatus
+    activeItemId?: StringNullableFilter<"Room"> | string | null
     createdAt?: DateTimeFilter<"Room"> | Date | string
     updatedAt?: DateTimeFilter<"Room"> | Date | string
   }
@@ -8403,7 +8688,10 @@ export namespace Prisma {
     imageUrl?: string | null
     startingPrice: number
     auctionType: $Enums.AuctionType
+    timerDuration?: number
     status?: $Enums.ItemStatus
+    winnerId?: string | null
+    finalPrice?: number | null
     startTime?: Date | string | null
     endTime?: Date | string | null
     createdAt?: Date | string
@@ -8418,7 +8706,10 @@ export namespace Prisma {
     imageUrl?: string | null
     startingPrice: number
     auctionType: $Enums.AuctionType
+    timerDuration?: number
     status?: $Enums.ItemStatus
+    winnerId?: string | null
+    finalPrice?: number | null
     startTime?: Date | string | null
     endTime?: Date | string | null
     createdAt?: Date | string
@@ -8496,7 +8787,10 @@ export namespace Prisma {
     imageUrl?: StringNullableFilter<"Item"> | string | null
     startingPrice?: IntFilter<"Item"> | number
     auctionType?: EnumAuctionTypeFilter<"Item"> | $Enums.AuctionType
+    timerDuration?: IntFilter<"Item"> | number
     status?: EnumItemStatusFilter<"Item"> | $Enums.ItemStatus
+    winnerId?: StringNullableFilter<"Item"> | string | null
+    finalPrice?: IntNullableFilter<"Item"> | number | null
     startTime?: DateTimeNullableFilter<"Item"> | Date | string | null
     endTime?: DateTimeNullableFilter<"Item"> | Date | string | null
     createdAt?: DateTimeFilter<"Item"> | Date | string
@@ -8506,6 +8800,8 @@ export namespace Prisma {
   export type RoomCreateWithoutItemsInput = {
     id?: string
     title: string
+    status?: $Enums.RoomStatus
+    activeItemId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     host: UserCreateNestedOneWithoutRoomsInput
@@ -8515,6 +8811,8 @@ export namespace Prisma {
     id?: string
     title: string
     hostId: string
+    status?: $Enums.RoomStatus
+    activeItemId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -8562,6 +8860,8 @@ export namespace Prisma {
   export type RoomUpdateWithoutItemsInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    activeItemId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     host?: UserUpdateOneRequiredWithoutRoomsNestedInput
@@ -8571,6 +8871,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     hostId?: StringFieldUpdateOperationsInput | string
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    activeItemId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -8598,7 +8900,10 @@ export namespace Prisma {
     imageUrl?: string | null
     startingPrice: number
     auctionType: $Enums.AuctionType
+    timerDuration?: number
     status?: $Enums.ItemStatus
+    winnerId?: string | null
+    finalPrice?: number | null
     startTime?: Date | string | null
     endTime?: Date | string | null
     createdAt?: Date | string
@@ -8614,7 +8919,10 @@ export namespace Prisma {
     imageUrl?: string | null
     startingPrice: number
     auctionType: $Enums.AuctionType
+    timerDuration?: number
     status?: $Enums.ItemStatus
+    winnerId?: string | null
+    finalPrice?: number | null
     startTime?: Date | string | null
     endTime?: Date | string | null
     createdAt?: Date | string
@@ -8671,7 +8979,10 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     startingPrice?: IntFieldUpdateOperationsInput | number
     auctionType?: EnumAuctionTypeFieldUpdateOperationsInput | $Enums.AuctionType
+    timerDuration?: IntFieldUpdateOperationsInput | number
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
+    winnerId?: NullableStringFieldUpdateOperationsInput | string | null
+    finalPrice?: NullableIntFieldUpdateOperationsInput | number | null
     startTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8687,7 +8998,10 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     startingPrice?: IntFieldUpdateOperationsInput | number
     auctionType?: EnumAuctionTypeFieldUpdateOperationsInput | $Enums.AuctionType
+    timerDuration?: IntFieldUpdateOperationsInput | number
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
+    winnerId?: NullableStringFieldUpdateOperationsInput | string | null
+    finalPrice?: NullableIntFieldUpdateOperationsInput | number | null
     startTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8790,6 +9104,8 @@ export namespace Prisma {
   export type RoomCreateManyHostInput = {
     id?: string
     title: string
+    status?: $Enums.RoomStatus
+    activeItemId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -8811,6 +9127,8 @@ export namespace Prisma {
   export type RoomUpdateWithoutHostInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    activeItemId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     items?: ItemUpdateManyWithoutRoomNestedInput
@@ -8819,6 +9137,8 @@ export namespace Prisma {
   export type RoomUncheckedUpdateWithoutHostInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    activeItemId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     items?: ItemUncheckedUpdateManyWithoutRoomNestedInput
@@ -8827,6 +9147,8 @@ export namespace Prisma {
   export type RoomUncheckedUpdateManyWithoutHostInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    activeItemId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -8880,7 +9202,10 @@ export namespace Prisma {
     imageUrl?: string | null
     startingPrice: number
     auctionType: $Enums.AuctionType
+    timerDuration?: number
     status?: $Enums.ItemStatus
+    winnerId?: string | null
+    finalPrice?: number | null
     startTime?: Date | string | null
     endTime?: Date | string | null
     createdAt?: Date | string
@@ -8894,7 +9219,10 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     startingPrice?: IntFieldUpdateOperationsInput | number
     auctionType?: EnumAuctionTypeFieldUpdateOperationsInput | $Enums.AuctionType
+    timerDuration?: IntFieldUpdateOperationsInput | number
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
+    winnerId?: NullableStringFieldUpdateOperationsInput | string | null
+    finalPrice?: NullableIntFieldUpdateOperationsInput | number | null
     startTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8909,7 +9237,10 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     startingPrice?: IntFieldUpdateOperationsInput | number
     auctionType?: EnumAuctionTypeFieldUpdateOperationsInput | $Enums.AuctionType
+    timerDuration?: IntFieldUpdateOperationsInput | number
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
+    winnerId?: NullableStringFieldUpdateOperationsInput | string | null
+    finalPrice?: NullableIntFieldUpdateOperationsInput | number | null
     startTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8924,7 +9255,10 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     startingPrice?: IntFieldUpdateOperationsInput | number
     auctionType?: EnumAuctionTypeFieldUpdateOperationsInput | $Enums.AuctionType
+    timerDuration?: IntFieldUpdateOperationsInput | number
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
+    winnerId?: NullableStringFieldUpdateOperationsInput | string | null
+    finalPrice?: NullableIntFieldUpdateOperationsInput | number | null
     startTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string

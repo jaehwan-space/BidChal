@@ -6,6 +6,8 @@ export interface Room {
   id: string;
   title: string;
   hostId: string;
+  status: 'WAITING' | 'ACTIVE' | 'FINISHED';
+  activeItemId: string | null;
   createdAt: string;
   updatedAt: string;
   host: {
@@ -25,10 +27,13 @@ export interface Item {
   imageUrl: string | null;
   startingPrice: number;
   auctionType: 'OPEN' | 'BLIND';
+  timerDuration: number;
   status: 'PENDING' | 'ACTIVE' | 'SOLD' | 'PASSED';
+  winnerId: string | null;
+  finalPrice: number | null;
   createdAt: string;
   updatedAt: string;
-  bids?: { amount: number }[];
+  bids?: { amount: number; userId: string }[];
   _count?: {
     bids: number;
   };
@@ -86,6 +91,7 @@ export interface CreateItemPayload {
   startingPrice: number;
   auctionType: 'OPEN' | 'BLIND';
   imageUrl?: string;
+  timerDuration?: number;
 }
 
 // 방에 새로운 아이템 추가
@@ -104,6 +110,22 @@ export function useCreateItem() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['room', variables.roomId] });
+    },
+  });
+}
+
+// 이미지 업로드
+export function useUploadImage() {
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch(`${API_URL}/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+      if (!res.ok) throw new Error('이미지 업로드에 실패했습니다.');
+      return res.json() as Promise<{ imageUrl: string }>;
     },
   });
 }

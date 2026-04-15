@@ -1,27 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '../components/common/Card';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
-import { useRoom, useCreateItem, CreateItemPayload } from '../hooks/useRooms';
+import { useRoom, useCreateItem, useUploadImage, CreateItemPayload } from '../hooks/useRooms';
 import { useAuthStore } from '../store/useAuthStore';
 import { Skeleton } from '../components/common/Skeleton';
-import { CheckCircle2, Lock } from 'lucide-react';
+import { CheckCircle2, Lock, Upload } from 'lucide-react';
 
 export function RoomSettings() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const { data: room, isLoading, isError } = useRoom(id);
   const createItemMutation = useCreateItem();
+  const uploadImageMutation = useUploadImage();
 
   const [formData, setFormData] = useState<Omit<CreateItemPayload, 'roomId'>>({
     name: '',
     description: '',
     startingPrice: 1000,
     auctionType: 'OPEN',
+    timerDuration: 30,
   });
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   // 호스트 가드
   useEffect(() => {
@@ -35,20 +40,40 @@ export function RoomSettings() {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'startingPrice' ? Number(value) : value,
+      [name]: (name === 'startingPrice' || name === 'timerDuration') ? Number(value) : value,
     }));
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSelectedFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
   };
 
   const handleCreateItem = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id) return;
     try {
+      let imageUrl: string | undefined;
+
+      // 이미지가 선택되었으면 먼저 업로드
+      if (selectedFile) {
+        const result = await uploadImageMutation.mutateAsync(selectedFile);
+        imageUrl = result.imageUrl;
+      }
+
       await createItemMutation.mutateAsync({
         roomId: id,
-        ...formData
+        ...formData,
+        imageUrl,
       });
-      setFormData({ name: '', description: '', startingPrice: 1000, auctionType: 'OPEN' });
-      alert('아이템이 등록되었습니다!');
+      setFormData({ name: '', description: '', startingPrice: 1000, auctionType: 'OPEN', timerDuration: 30 });
+      setImagePreview(null);
+      setSelectedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     } catch (err) {
       alert('아이템 등록에 실패했습니다.');
     }
@@ -56,7 +81,7 @@ export function RoomSettings() {
 
   if (isLoading) return <div style={{ padding: '24px' }}><Skeleton height={400} /></div>;
   if (isError || !room) return <div style={{ padding: '24px', color: 'var(--danger)' }}>방 정보를 불러올 수 없습니다.</div>;
-  if (room.hostId !== user?.id) return null; // 튕기기 전 살짝 보이는 렌더링 방지
+  if (room.hostId !== user?.id) return null;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -66,6 +91,39 @@ export function RoomSettings() {
         </p>
         
         <form onSubmit={handleCreateItem} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* 이미지 업로드 */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <label style={{ fontSize: '14px', fontWeight: 600 }}>아이템 사진</label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileSelect}
+              style={{ display: 'none' }}
+            />
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              style={{
+                width: '100%', aspectRatio: '16/9', borderRadius: 'var(--border-radius-md)',
+                border: '2px dashed var(--border-color)', cursor: 'pointer',
+                display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+                overflow: 'hidden', position: 'relative',
+                background: imagePreview ? 'transparent' : 'var(--bg-color)',
+              }}
+            >
+              {imagePreview ? (
+                <img src={imagePreview} alt="미리보기"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <>
+                  <Upload size={32} style={{ color: 'var(--text-secondary)', marginBottom: '8px' }} />
+                  <span style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>클릭하여 이미지를 선택하세요</span>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: '12px', marginTop: '4px' }}>JPG, PNG, GIF, WebP (최대 10MB)</span>
+                </>
+              )}
+            </div>
+          </div>
+
           <Input 
             label="아이템 이름" 
             name="name" 
@@ -90,6 +148,15 @@ export function RoomSettings() {
             min={100} 
             required 
           />
+          <Input 
+            label="카운트다운 시간 (초)" 
+            type="number" 
+            name="timerDuration" 
+            value={formData.timerDuration} 
+            onChange={handleChange} 
+            min={10} 
+            max={300} 
+          />
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <label style={{ fontSize: '14px', fontWeight: 600 }}>경매 방식 선택</label>
@@ -100,7 +167,7 @@ export function RoomSettings() {
                 onClick={() => setFormData({ ...formData, auctionType: 'OPEN' })}
                 style={{ flex: 1, display: 'flex', gap: '8px', justifyContent: 'center' }}
               >
-                <CheckCircle2 size={18} /> 일반 공개 입찰
+                <CheckCircle2 size={18} /> 공개 입찰
               </Button>
               <Button 
                 type="button"
@@ -108,18 +175,18 @@ export function RoomSettings() {
                 onClick={() => setFormData({ ...formData, auctionType: 'BLIND' })}
                 style={{ flex: 1, display: 'flex', gap: '8px', justifyContent: 'center' }}
               >
-                <Lock size={18} /> 비공개 (블라인드)
+                <Lock size={18} /> 블라인드
               </Button>
             </div>
             <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
               {formData.auctionType === 'OPEN' 
-                ? '최고 입찰가가 갱신될 때마다 참가자 전원에게 알림과 실시간 가격이 공유됩니다.' 
-                : '입찰 현황이 숨겨지며 참가자는 치열한 심리전을 펼치게 됩니다.'}
+                ? '최고 입찰가가 실시간으로 공개됩니다.' 
+                : '입찰 현황이 숨겨지며 심리전을 펼칩니다.'}
             </span>
           </div>
 
-          <Button type="submit" disabled={createItemMutation.isPending} style={{ marginTop: '16px' }}>
-            {createItemMutation.isPending ? '등록 중...' : '아이템 성공적으로 등록하기'}
+          <Button type="submit" disabled={createItemMutation.isPending || uploadImageMutation.isPending} style={{ marginTop: '16px' }}>
+            {uploadImageMutation.isPending ? '이미지 업로드 중...' : createItemMutation.isPending ? '등록 중...' : '아이템 등록하기'}
           </Button>
         </form>
       </Card>
@@ -130,17 +197,37 @@ export function RoomSettings() {
           <div style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '24px 0' }}>등록된 아이템이 없습니다.</div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {room.items?.map(item => (
-              <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '16px', backgroundColor: 'var(--bg-color)', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--border-color)' }}>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {room.items?.map((item, index) => (
+              <div key={item.id} style={{
+                display: 'flex', gap: '12px', padding: '12px',
+                backgroundColor: 'var(--bg-color)', borderRadius: 'var(--border-radius-sm)',
+                border: '1px solid var(--border-color)'
+              }}>
+                {/* 썸네일 */}
+                <div style={{
+                  width: '64px', height: '64px', borderRadius: '8px', overflow: 'hidden',
+                  background: '#eee', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                  {item.imageUrl ? (
+                    <img src={item.imageUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <span style={{ fontSize: '24px' }}>📦</span>
+                  )}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>#{index + 1}</span>
                     {item.name}
-                    <span style={{ fontSize: '12px', padding: '2px 8px', borderRadius: '12px', backgroundColor: item.auctionType === 'OPEN' ? 'rgba(49, 130, 246, 0.1)' : 'rgba(240, 68, 82, 0.1)', color: item.auctionType === 'OPEN' ? 'var(--success)' : 'var(--danger)' }}>
+                    <span style={{
+                      fontSize: '11px', padding: '2px 8px', borderRadius: '12px',
+                      background: item.auctionType === 'OPEN' ? 'rgba(49,130,246,0.1)' : 'rgba(240,68,82,0.1)',
+                      color: item.auctionType === 'OPEN' ? 'var(--success)' : 'var(--danger)'
+                    }}>
                       {item.auctionType === 'OPEN' ? '공개' : '블라인드'}
                     </span>
                   </div>
-                  <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                    시작가: {item.startingPrice.toLocaleString()} P | 입찰자: {item._count?.bids || 0} 명
+                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                    시작가: {item.startingPrice.toLocaleString()}P · 타이머: {item.timerDuration}초
                   </div>
                 </div>
               </div>
@@ -148,11 +235,13 @@ export function RoomSettings() {
           </div>
         )}
         
-        <div style={{ marginTop: '32px' }}>
-          <Button variant="primary" onClick={() => navigate(`/room/${id}`)} style={{ width: '100%', padding: '16px' }}>
-            🎉 모든 준비 완료! 경매장 입장하기
+        <div style={{ marginTop: '32px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <Button variant="primary" onClick={() => navigate(`/room/${id}/host`)} 
+            disabled={(room.items?.length || 0) === 0}
+            style={{ width: '100%', padding: '16px' }}>
+            🎤 호스트 제어판으로 이동
           </Button>
-          <Button variant="secondary" onClick={() => navigate('/')} style={{ width: '100%', marginTop: '12px' }}>
+          <Button variant="secondary" onClick={() => navigate('/')} style={{ width: '100%' }}>
             로비로 나가기
           </Button>
         </div>

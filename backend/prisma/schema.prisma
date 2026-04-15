@@ -27,6 +27,12 @@ enum ItemStatus {
   PASSED   // 유찰
 }
 
+enum RoomStatus {
+  WAITING   // 대기 (아이템 등록 단계)
+  ACTIVE    // 경매 진행 중
+  FINISHED  // 모든 경매 완료
+}
+
 enum TransactionReason {
   CHARGE      // 포인트 충전
   DEPOSIT     // 입찰 보증금 또는 결제 비용 차감
@@ -52,31 +58,36 @@ model User {
 }
 
 model Room {
-  id        String   @id @default(uuid())
-  title     String
-  hostId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String     @id @default(uuid())
+  title         String
+  hostId        String
+  status        RoomStatus @default(WAITING)
+  activeItemId  String?    // 현재 경매 진행 중인 아이템의 ID
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 
-  host      User     @relation("HostRooms", fields: [hostId], references: [id])
-  items     Item[]
+  host          User       @relation("HostRooms", fields: [hostId], references: [id])
+  items         Item[]
 }
 
 model Item {
-  id            String   @id @default(uuid())
+  id            String      @id @default(uuid())
   roomId        String
   name          String
   description   String?
-  imageUrl      String?  // 썸네일 이미지 링크
+  imageUrl      String?     // 썸네일 이미지 링크
   startingPrice Int
   auctionType   AuctionType // 핵심 비즈니스 로직 - 아이템별로 오픈/블라인드 설정
-  status        ItemStatus   @default(PENDING)
+  timerDuration Int         @default(30) // 아이템별 카운트다운 시간 (초)
+  status        ItemStatus  @default(PENDING)
+  winnerId      String?     // 낙찰자 ID
+  finalPrice    Int?        // 낙찰 최종가
   startTime     DateTime?
   endTime       DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
-  room          Room     @relation(fields: [roomId], references: [id])
+  room          Room        @relation(fields: [roomId], references: [id])
   bids          Bid[]
 }
 

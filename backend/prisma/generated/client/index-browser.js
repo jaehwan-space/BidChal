@@ -135,6 +135,8 @@ exports.Prisma.RoomScalarFieldEnum = {
   id: 'id',
   title: 'title',
   hostId: 'hostId',
+  status: 'status',
+  activeItemId: 'activeItemId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -147,7 +149,10 @@ exports.Prisma.ItemScalarFieldEnum = {
   imageUrl: 'imageUrl',
   startingPrice: 'startingPrice',
   auctionType: 'auctionType',
+  timerDuration: 'timerDuration',
   status: 'status',
+  winnerId: 'winnerId',
+  finalPrice: 'finalPrice',
   startTime: 'startTime',
   endTime: 'endTime',
   createdAt: 'createdAt',
@@ -184,6 +189,12 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.RoomStatus = exports.$Enums.RoomStatus = {
+  WAITING: 'WAITING',
+  ACTIVE: 'ACTIVE',
+  FINISHED: 'FINISHED'
+};
+
 exports.AuctionType = exports.$Enums.AuctionType = {
   OPEN: 'OPEN',
   BLIND: 'BLIND'

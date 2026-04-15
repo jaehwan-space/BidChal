@@ -5,6 +5,8 @@ import { Signup } from './pages/Signup';
 import { Lobby } from './pages/Lobby';
 import { Room } from './pages/Room';
 import { RoomSettings } from './pages/RoomSettings';
+import { HostControl } from './pages/HostControl';
+import { DisplayView } from './pages/DisplayView';
 import { useAuthStore } from './store/useAuthStore';
 
 import { ReactNode } from 'react';
@@ -20,36 +22,59 @@ function RequireAuth({ children }: { children: ReactNode }) {
 
 function App() {
   return (
-    <Layout>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route 
-          path="/" 
-          element={
-            <RequireAuth>
-              <Lobby />
-            </RequireAuth>
-          } 
-        />
-        <Route 
-          path="/room/:id/settings" 
-          element={
-            <RequireAuth>
-              <RoomSettings />
-            </RequireAuth>
-          } 
-        />
-        <Route 
-          path="/room/:id" 
-          element={
-            <RequireAuth>
-              <Room />
-            </RequireAuth>
-          } 
-        />
-      </Routes>
-    </Layout>
+    <Routes>
+      {/* 디스플레이 뷰 - Layout 없이 풀스크린 (로그인 필요) */}
+      <Route 
+        path="/room/:id/display" 
+        element={
+          <RequireAuth>
+            <DisplayView />
+          </RequireAuth>
+        } 
+      />
+      
+      {/* 나머지는 Layout 안에 */}
+      <Route path="*" element={
+        <Layout>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route 
+              path="/" 
+              element={
+                <RequireAuth>
+                  <Lobby />
+                </RequireAuth>
+              } 
+            />
+            <Route 
+              path="/room/:id/settings" 
+              element={
+                <RequireAuth>
+                  <RoomSettings />
+                </RequireAuth>
+              } 
+            />
+            <Route 
+              path="/room/:id/host" 
+              element={
+                <RequireAuth>
+                  <HostControl />
+                </RequireAuth>
+              } 
+            />
+            <Route 
+              path="/room/:id" 
+              element={
+                <RequireAuth>
+                  <Room />
+                </RequireAuth>
+              } 
+            />
+          </Routes>
+        </Layout>
+      } />
+    </Routes>
   );
 }
 
