@@ -21,6 +21,7 @@ export function HostControl() {
   const [remainingTime, setRemainingTime] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
+  const [lastBidderName, setLastBidderName] = useState<string | null>(null);
 
   useEffect(() => { connect(); }, [connect]);
 
@@ -75,6 +76,7 @@ export function HostControl() {
         if (!prev || prev.id !== data.itemId) return prev;
         return { ...prev, currentHighest: data.newAmount, totalBids: data.totalBids };
       });
+      setLastBidderName(data.lastBidderName || null);
     };
 
     const handleItemSold = () => {
@@ -205,6 +207,12 @@ export function HostControl() {
                 <span style={{ color: 'var(--text-secondary)' }}>입찰 횟수</span>
                 <span>{activeItem.totalBids}회</span>
               </div>
+              {lastBidderName && (
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--text-secondary)' }}>최고 입찰자</span>
+                  <span style={{ fontWeight: 600, color: 'var(--primary)' }}>🏷️ {lastBidderName}</span>
+                </div>
+              )}
               <div style={{
                 display: 'flex', justifyContent: 'center', alignItems: 'center',
                 padding: '16px', fontSize: '32px', fontWeight: 800,

@@ -21,6 +21,7 @@ export function DisplayView() {
   const [activeState, setActiveState] = useState<ActiveItemState | null>(null);
   const [soldInfo, setSoldInfo] = useState<{ winnerName: string; finalPrice: number; itemName: string } | null>(null);
   const [passedInfo, setPassedInfo] = useState<{ itemName: string } | null>(null);
+  const [maxTime, setMaxTime] = useState(30); // 타이머 바 용 최대 시간 추적
 
   useEffect(() => { connect(); }, [connect]);
 
@@ -49,6 +50,7 @@ export function DisplayView() {
         totalItems: data.totalItems,
         currentIndex: data.currentIndex,
       });
+      setMaxTime(data.remainingTime);
       setPhase('active');
     };
 
@@ -59,11 +61,13 @@ export function DisplayView() {
         totalItems: data.totalItems,
         currentIndex: data.currentIndex,
       });
+      setMaxTime(data.remainingTime);
       setPhase('active');
     };
 
     const handleTimerTick = (data: { remainingTime: number }) => {
       setActiveState(prev => prev ? { ...prev, remainingTime: data.remainingTime } : null);
+      setMaxTime(prev => Math.max(prev, data.remainingTime));
     };
 
     const handleUpdateBid = (data: { itemId: string; newAmount: number; lastBidderName: string; totalBids: number }) => {
@@ -111,9 +115,9 @@ export function DisplayView() {
     };
   }, [socket, isConnected, roomId]);
 
-  // 타이머 비율 계산 (원형 프로그레스용)
+  // 타이머 비율 계산 (연장 시에도 정상 감소하도록 maxTime 기준)
   const timerRatio = activeState
-    ? activeState.remainingTime / (activeState.item.timerDuration || 30)
+    ? activeState.remainingTime / maxTime
     : 1;
 
   const timerColor = activeState
