@@ -212,8 +212,8 @@ export function Room() {
             style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
             
             {/* 타이머 바 (일시정지 시 오버레이 처리) */}
-            <div style={{ padding: '12px 16px', background: 'var(--panel-bg)', borderRadius: 'var(--border-radius-md)', 
-              border: '1px solid var(--border-color)', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ padding: '12px 16px', background: 'var(--glass-bg)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: 'var(--border-radius-md)', 
+              border: '1px solid var(--glass-border)', position: 'relative', overflow: 'hidden', boxShadow: 'var(--shadow-sm)' }}>
               {isPaused && (
                 <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <span style={{ color: 'white', fontWeight: 800, fontSize: '18px', letterSpacing: '2px' }}>일시정지 됨</span>

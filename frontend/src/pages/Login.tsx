@@ -4,6 +4,7 @@ import { Input } from '../components/common/Input';
 import { Button } from '../components/common/Button';
 import { Card } from '../components/common/Card';
 import { useAuthStore } from '../store/useAuthStore';
+import { motion } from 'framer-motion';
 
 // 임시 로컬 API URL (Vite Proxy 세팅 전)
 const API_URL = '/api';
@@ -46,8 +47,9 @@ export function Login() {
   };
 
   return (
-    <Card title="로그인">
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+      <Card title="BidChal 로그인" subtitle="모의 경매 플랫폼에 다시 오신 것을 환영합니다.">
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <Input 
           label="닉네임 (아이디)" 
           value={username} 
@@ -72,6 +74,7 @@ export function Login() {
           </Button>
         </div>
       </form>
-    </Card>
+      </Card>
+    </motion.div>
   );
 }

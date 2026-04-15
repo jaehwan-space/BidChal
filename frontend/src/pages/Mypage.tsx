@@ -140,8 +140,11 @@ export function Mypage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
             {data.wonItems.map(item => (
               <div key={item.id} style={{ 
-                background: 'var(--panel-bg)', borderRadius: 'var(--border-radius-md)', 
-                overflow: 'hidden', border: '1px solid var(--border-color)' 
+                background: 'var(--glass-bg)', 
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                borderRadius: 'var(--border-radius-md)', 
+                overflow: 'hidden', border: '1px solid var(--glass-border)' 
               }}>
                 {item.imageUrl ? (
                   <img src={item.imageUrl} alt={item.name} style={{ width: '100%', aspectRatio: '1', objectFit: 'cover' }} />

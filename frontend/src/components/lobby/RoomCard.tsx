@@ -14,15 +14,17 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
       whileTap={{ scale: 0.98 }}
       onClick={() => onClick(room.id)}
       style={{
-        backgroundColor: 'var(--panel-bg)',
+        backgroundColor: 'var(--glass-bg)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
         borderRadius: 'var(--border-radius-md)',
-        padding: '20px',
+        padding: '24px',
         cursor: 'pointer',
         boxShadow: 'var(--shadow-sm)',
-        border: '1px solid var(--border-color)',
+        border: '1px solid var(--glass-border)',
         display: 'flex',
         flexDirection: 'column',
-        gap: '12px'
+        gap: '16px'
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>

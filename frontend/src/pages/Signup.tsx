@@ -4,6 +4,8 @@ import { Input } from '../components/common/Input';
 import { Button } from '../components/common/Button';
 import { Card } from '../components/common/Card';
 
+import { motion } from 'framer-motion';
+
 const API_URL = '/api';
 
 export function Signup() {
@@ -58,8 +60,9 @@ export function Signup() {
   };
 
   return (
-    <Card title="10초만에 회원가입">
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+      <Card title="빠른 회원가입" subtitle="10초만에 가입하고 경매에 참여해보세요.">
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <Input 
           label="닉네임 (아이디)" 
           value={username} 
@@ -97,6 +100,7 @@ export function Signup() {
           </Button>
         </div>
       </form>
-    </Card>
+      </Card>
+    </motion.div>
   );
 }
