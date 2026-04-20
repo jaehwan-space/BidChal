@@ -3,10 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '../components/common/Card';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
-import { useRoom, useCreateItem, useUploadImage, useDeleteItem, useReorderItem, CreateItemPayload } from '../hooks/useRooms';
+import { useRoom, useCreateItem, useUploadImage, useDeleteItem, useReorderItem, useUpdateItem, CreateItemPayload } from '../hooks/useRooms';
 import { useAuthStore } from '../store/useAuthStore';
 import { Skeleton } from '../components/common/Skeleton';
-import { CheckCircle2, Lock, Upload, ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
+import { CheckCircle2, Lock, Upload, ArrowUp, ArrowDown, Trash2, Edit2 } from 'lucide-react';
 
 export function RoomSettings() {
   const { id } = useParams<{ id: string }>();
@@ -19,6 +19,7 @@ export function RoomSettings() {
   const uploadImageMutation = useUploadImage();
   const deleteItemMutation = useDeleteItem();
   const reorderItemMutation = useReorderItem();
+  const updateItemMutation = useUpdateItem();
 
   const [formData, setFormData] = useState<Omit<CreateItemPayload, 'roomId'>>({
     name: '',
@@ -29,6 +30,8 @@ export function RoomSettings() {
   });
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [dragActive, setDragActive] = useState(false);
 
   // 호스트 가드
   useEffect(() => {
@@ -55,29 +58,69 @@ export function RoomSettings() {
     reader.readAsDataURL(file);
   };
 
-  const handleCreateItem = async (e: React.FormEvent) => {
+  const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); setDragActive(true); };
+  const handleDragLeave = (e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); setDragActive(false); };
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault(); e.stopPropagation(); setDragActive(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setImagePreview(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({ name: '', description: '', startingPrice: 1000, auctionType: 'OPEN', timerDuration: 30 });
+    setImagePreview(null);
+    setSelectedFile(null);
+    setEditingItemId(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const startEdit = (item: any) => {
+    setEditingItemId(item.id);
+    setFormData({
+      name: item.name,
+      description: item.description || '',
+      startingPrice: item.startingPrice,
+      auctionType: item.auctionType,
+      timerDuration: item.timerDuration,
+      imageUrl: item.imageUrl // Keep previous so it won't disappear if no new file is added
+    });
+    setImagePreview(item.imageUrl || null);
+    setSelectedFile(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id) return;
     try {
-      let imageUrl: string | undefined;
+      let imageUrl = formData.imageUrl; // Retain existing imageUrl by default during edit
 
-      // 이미지가 선택되었으면 먼저 업로드
       if (selectedFile) {
         const result = await uploadImageMutation.mutateAsync(selectedFile);
         imageUrl = result.imageUrl;
       }
 
-      await createItemMutation.mutateAsync({
-        roomId: id,
-        ...formData,
-        imageUrl,
-      });
-      setFormData({ name: '', description: '', startingPrice: 1000, auctionType: 'OPEN', timerDuration: 30 });
-      setImagePreview(null);
-      setSelectedFile(null);
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      if (editingItemId) {
+        await updateItemMutation.mutateAsync({
+          roomId: id,
+          itemId: editingItemId,
+          payload: { ...formData, imageUrl },
+        });
+      } else {
+        await createItemMutation.mutateAsync({
+          roomId: id,
+          ...formData,
+          imageUrl,
+        });
+      }
+      resetForm();
     } catch (err) {
-      alert('아이템 등록에 실패했습니다.');
+      alert('처리에 실패했습니다.');
     }
   };
 
@@ -89,13 +132,13 @@ export function RoomSettings() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       <Card title={`경매 설정: ${room.title}`}>
         <p style={{ color: 'var(--text-secondary)', marginTop: 0, marginBottom: '24px' }}>
-          경매에 부칠 새로운 아이템을 등록하세요.
+          {editingItemId ? '기존에 등록한 아이템 정보를 수정합니다.' : '경매에 부칠 새로운 아이템을 등록하세요.'}
         </p>
         
-        <form onSubmit={handleCreateItem} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {/* 이미지 업로드 */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '14px', fontWeight: 600 }}>아이템 사진</label>
+            <label style={{ fontSize: '14px', fontWeight: 600 }}>아이템 사진 (드래그앤드롭 가능)</label>
             <input
               ref={fileInputRef}
               type="file"
@@ -105,12 +148,15 @@ export function RoomSettings() {
             />
             <div
               onClick={() => fileInputRef.current?.click()}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
               style={{
                 width: '100%', aspectRatio: '16/9', borderRadius: 'var(--border-radius-md)',
-                border: '2px dashed var(--border-color)', cursor: 'pointer',
-                display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+                border: `2px dashed ${dragActive ? 'var(--primary)' : 'var(--border-color)'}`, 
+                cursor: 'pointer', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
                 overflow: 'hidden', position: 'relative',
-                background: imagePreview ? 'transparent' : 'var(--bg-color)',
+                background: dragActive ? 'rgba(49,130,246,0.1)' : (imagePreview ? 'transparent' : 'var(--bg-color)'),
               }}
             >
               {imagePreview ? (
@@ -187,9 +233,16 @@ export function RoomSettings() {
             </span>
           </div>
 
-          <Button type="submit" disabled={createItemMutation.isPending || uploadImageMutation.isPending} style={{ marginTop: '16px' }}>
-            {uploadImageMutation.isPending ? '이미지 업로드 중...' : createItemMutation.isPending ? '등록 중...' : '아이템 등록하기'}
-          </Button>
+          <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
+            <Button type="submit" disabled={createItemMutation.isPending || updateItemMutation.isPending || uploadImageMutation.isPending} style={{ flex: 1 }}>
+              {uploadImageMutation.isPending ? '이미지 업로드 중...' : (editingItemId ? '변경 사항 저장' : '아이템 등록하기')}
+            </Button>
+            {editingItemId && (
+              <Button type="button" variant="secondary" onClick={resetForm} style={{ flex: 1 }}>
+                수정 취소
+              </Button>
+            )}
+          </div>
         </form>
       </Card>
 
@@ -237,6 +290,15 @@ export function RoomSettings() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', justifyContent: 'center' }}>
                   <div style={{ display: 'flex', gap: '4px' }}>
                     <button
+                      title="수정하기"
+                      onClick={() => startEdit(item)}
+                      disabled={item.status !== 'PENDING'}
+                      style={{ background: 'var(--glass-bg)', border: 'none', borderRadius: '4px', padding: '4px', cursor: item.status === 'PENDING' ? 'pointer' : 'not-allowed', color: item.status === 'PENDING' ? 'var(--primary)' : 'var(--border-color)' }}
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                    <button
+                      title="위로 이동"
                       disabled={index === 0 || reorderItemMutation.isPending}
                       onClick={() => id && reorderItemMutation.mutate({ roomId: id, itemId: item.id, direction: 'up' })}
                       style={{ background: 'var(--glass-bg)', border: 'none', borderRadius: '4px', padding: '4px', cursor: index === 0 ? 'not-allowed' : 'pointer', color: index === 0 ? 'var(--border-color)' : 'var(--text-primary)' }}
@@ -244,6 +306,7 @@ export function RoomSettings() {
                       <ArrowUp size={16} />
                     </button>
                     <button
+                      title="아래로 이동"
                       disabled={index === (room.items?.length || 0) - 1 || reorderItemMutation.isPending}
                       onClick={() => id && reorderItemMutation.mutate({ roomId: id, itemId: item.id, direction: 'down' })}
                       style={{ background: 'var(--glass-bg)', border: 'none', borderRadius: '4px', padding: '4px', cursor: index === (room.items?.length || 0) - 1 ? 'not-allowed' : 'pointer', color: index === (room.items?.length || 0) - 1 ? 'var(--border-color)' : 'var(--text-primary)' }}
@@ -252,13 +315,14 @@ export function RoomSettings() {
                     </button>
                   </div>
                   <button
+                    title="삭제하기"
                     onClick={() => {
                       if (window.confirm('이 아이템을 삭제하시겠습니까?')) {
                         id && deleteItemMutation.mutate({ roomId: id, itemId: item.id });
                       }
                     }}
-                    disabled={deleteItemMutation.isPending}
-                    style={{ background: 'rgba(240,68,82,0.1)', border: 'none', borderRadius: '4px', padding: '4px', cursor: 'pointer', color: 'var(--danger)', display: 'flex', justifyContent: 'center' }}
+                    disabled={deleteItemMutation.isPending || item.status !== 'PENDING'}
+                    style={{ background: 'rgba(240,68,82,0.1)', border: 'none', borderRadius: '4px', padding: '4px', cursor: item.status === 'PENDING' ? 'pointer' : 'not-allowed', color: item.status === 'PENDING' ? 'var(--danger)' : 'var(--border-color)', display: 'flex', justifyContent: 'center' }}
                   >
                     <Trash2 size={16} />
                   </button>

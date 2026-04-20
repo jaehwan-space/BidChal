@@ -81,6 +81,36 @@ router.delete('/:itemId', async (req, res) => {
   }
 });
 
+// 아이템 정보 수정
+router.put('/:itemId', async (req, res) => {
+  try {
+    const { roomId, itemId } = req.params as { roomId: string; itemId: string };
+    const { name, description, startingPrice, auctionType, timerDuration, imageUrl } = req.body;
+
+    const item = await prisma.item.findUnique({ where: { id: itemId } });
+    if (!item) return res.status(404).json({ error: 'Item not found' });
+    if (item.roomId !== roomId) return res.status(400).json({ error: 'Invalid room' });
+    if (item.status !== 'PENDING') return res.status(400).json({ error: 'Cannot modify an item that already started or finished' });
+
+    const updatedItem = await prisma.item.update({
+      where: { id: itemId },
+      data: {
+        name: name !== undefined ? name : item.name,
+        description: description !== undefined ? description : item.description,
+        startingPrice: startingPrice !== undefined ? startingPrice : item.startingPrice,
+        auctionType: auctionType !== undefined ? auctionType : item.auctionType,
+        timerDuration: timerDuration !== undefined ? timerDuration : item.timerDuration,
+        imageUrl: imageUrl !== undefined ? imageUrl : item.imageUrl,
+      }
+    });
+
+    res.json(updatedItem);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to update item' });
+  }
+});
+
 // 아이템 순서 변경
 router.put('/:itemId/reorder', async (req, res) => {
   try {

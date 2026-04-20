@@ -170,3 +170,26 @@ export function useReorderItem() {
     },
   });
 }
+
+// 아이템 수정
+export function useUpdateItem() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ roomId, itemId, payload }: { roomId: string; itemId: string; payload: Partial<CreateItemPayload> }) => {
+      const res = await fetch(`${API_URL}/rooms/${roomId}/items/${itemId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || '아이템을 수정하지 못했습니다.');
+      }
+      return res.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['room', variables.roomId] });
+    },
+  });
+}
