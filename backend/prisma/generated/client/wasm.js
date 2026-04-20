@@ -156,6 +156,7 @@ exports.Prisma.ItemScalarFieldEnum = {
   finalPrice: 'finalPrice',
   startTime: 'startTime',
   endTime: 'endTime',
+  order: 'order',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

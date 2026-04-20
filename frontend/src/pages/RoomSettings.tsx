@@ -3,10 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '../components/common/Card';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
-import { useRoom, useCreateItem, useUploadImage, CreateItemPayload } from '../hooks/useRooms';
+import { useRoom, useCreateItem, useUploadImage, useDeleteItem, useReorderItem, CreateItemPayload } from '../hooks/useRooms';
 import { useAuthStore } from '../store/useAuthStore';
 import { Skeleton } from '../components/common/Skeleton';
-import { CheckCircle2, Lock, Upload } from 'lucide-react';
+import { CheckCircle2, Lock, Upload, ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
 
 export function RoomSettings() {
   const { id } = useParams<{ id: string }>();
@@ -17,6 +17,8 @@ export function RoomSettings() {
   const { data: room, isLoading, isError } = useRoom(id);
   const createItemMutation = useCreateItem();
   const uploadImageMutation = useUploadImage();
+  const deleteItemMutation = useDeleteItem();
+  const reorderItemMutation = useReorderItem();
 
   const [formData, setFormData] = useState<Omit<CreateItemPayload, 'roomId'>>({
     name: '',
@@ -229,6 +231,37 @@ export function RoomSettings() {
                   <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>
                     시작가: {item.startingPrice.toLocaleString()}P · 타이머: {item.timerDuration}초
                   </div>
+                </div>
+                
+                {/* 컨트롤 버튼 */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', justifyContent: 'center' }}>
+                  <div style={{ display: 'flex', gap: '4px' }}>
+                    <button
+                      disabled={index === 0 || reorderItemMutation.isPending}
+                      onClick={() => id && reorderItemMutation.mutate({ roomId: id, itemId: item.id, direction: 'up' })}
+                      style={{ background: 'var(--glass-bg)', border: 'none', borderRadius: '4px', padding: '4px', cursor: index === 0 ? 'not-allowed' : 'pointer', color: index === 0 ? 'var(--border-color)' : 'var(--text-primary)' }}
+                    >
+                      <ArrowUp size={16} />
+                    </button>
+                    <button
+                      disabled={index === (room.items?.length || 0) - 1 || reorderItemMutation.isPending}
+                      onClick={() => id && reorderItemMutation.mutate({ roomId: id, itemId: item.id, direction: 'down' })}
+                      style={{ background: 'var(--glass-bg)', border: 'none', borderRadius: '4px', padding: '4px', cursor: index === (room.items?.length || 0) - 1 ? 'not-allowed' : 'pointer', color: index === (room.items?.length || 0) - 1 ? 'var(--border-color)' : 'var(--text-primary)' }}
+                    >
+                      <ArrowDown size={16} />
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (window.confirm('이 아이템을 삭제하시겠습니까?')) {
+                        id && deleteItemMutation.mutate({ roomId: id, itemId: item.id });
+                      }
+                    }}
+                    disabled={deleteItemMutation.isPending}
+                    style={{ background: 'rgba(240,68,82,0.1)', border: 'none', borderRadius: '4px', padding: '4px', cursor: 'pointer', color: 'var(--danger)', display: 'flex', justifyContent: 'center' }}
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
               </div>
             ))}

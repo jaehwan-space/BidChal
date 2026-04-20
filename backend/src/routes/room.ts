@@ -64,7 +64,7 @@ router.get('/:id', async (req, res) => {
           select: { username: true }
         },
         items: {
-          orderBy: { createdAt: 'asc' },
+          orderBy: [ { order: 'asc' }, { createdAt: 'asc' } ],
           include: {
             bids: {
               orderBy: { amount: 'desc' },

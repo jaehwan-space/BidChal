@@ -3408,12 +3408,14 @@ export namespace Prisma {
     startingPrice: number | null
     timerDuration: number | null
     finalPrice: number | null
+    order: number | null
   }
 
   export type ItemSumAggregateOutputType = {
     startingPrice: number | null
     timerDuration: number | null
     finalPrice: number | null
+    order: number | null
   }
 
   export type ItemMinAggregateOutputType = {
@@ -3430,6 +3432,7 @@ export namespace Prisma {
     finalPrice: number | null
     startTime: Date | null
     endTime: Date | null
+    order: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -3448,6 +3451,7 @@ export namespace Prisma {
     finalPrice: number | null
     startTime: Date | null
     endTime: Date | null
+    order: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -3466,6 +3470,7 @@ export namespace Prisma {
     finalPrice: number
     startTime: number
     endTime: number
+    order: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -3476,12 +3481,14 @@ export namespace Prisma {
     startingPrice?: true
     timerDuration?: true
     finalPrice?: true
+    order?: true
   }
 
   export type ItemSumAggregateInputType = {
     startingPrice?: true
     timerDuration?: true
     finalPrice?: true
+    order?: true
   }
 
   export type ItemMinAggregateInputType = {
@@ -3498,6 +3505,7 @@ export namespace Prisma {
     finalPrice?: true
     startTime?: true
     endTime?: true
+    order?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -3516,6 +3524,7 @@ export namespace Prisma {
     finalPrice?: true
     startTime?: true
     endTime?: true
+    order?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -3534,6 +3543,7 @@ export namespace Prisma {
     finalPrice?: true
     startTime?: true
     endTime?: true
+    order?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -3639,6 +3649,7 @@ export namespace Prisma {
     finalPrice: number | null
     startTime: Date | null
     endTime: Date | null
+    order: number
     createdAt: Date
     updatedAt: Date
     _count: ItemCountAggregateOutputType | null
@@ -3676,6 +3687,7 @@ export namespace Prisma {
     finalPrice?: boolean
     startTime?: boolean
     endTime?: boolean
+    order?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     room?: boolean | RoomDefaultArgs<ExtArgs>
@@ -3697,6 +3709,7 @@ export namespace Prisma {
     finalPrice?: boolean
     startTime?: boolean
     endTime?: boolean
+    order?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     room?: boolean | RoomDefaultArgs<ExtArgs>
@@ -3716,6 +3729,7 @@ export namespace Prisma {
     finalPrice?: boolean
     startTime?: boolean
     endTime?: boolean
+    order?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
@@ -3749,6 +3763,7 @@ export namespace Prisma {
       finalPrice: number | null
       startTime: Date | null
       endTime: Date | null
+      order: number
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["item"]>
@@ -4159,6 +4174,7 @@ export namespace Prisma {
     readonly finalPrice: FieldRef<"Item", 'Int'>
     readonly startTime: FieldRef<"Item", 'DateTime'>
     readonly endTime: FieldRef<"Item", 'DateTime'>
+    readonly order: FieldRef<"Item", 'Int'>
     readonly createdAt: FieldRef<"Item", 'DateTime'>
     readonly updatedAt: FieldRef<"Item", 'DateTime'>
   }
@@ -6507,6 +6523,7 @@ export namespace Prisma {
     finalPrice: 'finalPrice',
     startTime: 'startTime',
     endTime: 'endTime',
+    order: 'order',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -6838,6 +6855,7 @@ export namespace Prisma {
     finalPrice?: IntNullableFilter<"Item"> | number | null
     startTime?: DateTimeNullableFilter<"Item"> | Date | string | null
     endTime?: DateTimeNullableFilter<"Item"> | Date | string | null
+    order?: IntFilter<"Item"> | number
     createdAt?: DateTimeFilter<"Item"> | Date | string
     updatedAt?: DateTimeFilter<"Item"> | Date | string
     room?: XOR<RoomRelationFilter, RoomWhereInput>
@@ -6858,6 +6876,7 @@ export namespace Prisma {
     finalPrice?: SortOrderInput | SortOrder
     startTime?: SortOrderInput | SortOrder
     endTime?: SortOrderInput | SortOrder
+    order?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     room?: RoomOrderByWithRelationInput
@@ -6881,6 +6900,7 @@ export namespace Prisma {
     finalPrice?: IntNullableFilter<"Item"> | number | null
     startTime?: DateTimeNullableFilter<"Item"> | Date | string | null
     endTime?: DateTimeNullableFilter<"Item"> | Date | string | null
+    order?: IntFilter<"Item"> | number
     createdAt?: DateTimeFilter<"Item"> | Date | string
     updatedAt?: DateTimeFilter<"Item"> | Date | string
     room?: XOR<RoomRelationFilter, RoomWhereInput>
@@ -6901,6 +6921,7 @@ export namespace Prisma {
     finalPrice?: SortOrderInput | SortOrder
     startTime?: SortOrderInput | SortOrder
     endTime?: SortOrderInput | SortOrder
+    order?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: ItemCountOrderByAggregateInput
@@ -6927,6 +6948,7 @@ export namespace Prisma {
     finalPrice?: IntNullableWithAggregatesFilter<"Item"> | number | null
     startTime?: DateTimeNullableWithAggregatesFilter<"Item"> | Date | string | null
     endTime?: DateTimeNullableWithAggregatesFilter<"Item"> | Date | string | null
+    order?: IntWithAggregatesFilter<"Item"> | number
     createdAt?: DateTimeWithAggregatesFilter<"Item"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Item"> | Date | string
   }
@@ -7216,6 +7238,7 @@ export namespace Prisma {
     finalPrice?: number | null
     startTime?: Date | string | null
     endTime?: Date | string | null
+    order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     room: RoomCreateNestedOneWithoutItemsInput
@@ -7236,6 +7259,7 @@ export namespace Prisma {
     finalPrice?: number | null
     startTime?: Date | string | null
     endTime?: Date | string | null
+    order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     bids?: BidUncheckedCreateNestedManyWithoutItemInput
@@ -7254,6 +7278,7 @@ export namespace Prisma {
     finalPrice?: NullableIntFieldUpdateOperationsInput | number | null
     startTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     room?: RoomUpdateOneRequiredWithoutItemsNestedInput
@@ -7274,6 +7299,7 @@ export namespace Prisma {
     finalPrice?: NullableIntFieldUpdateOperationsInput | number | null
     startTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     bids?: BidUncheckedUpdateManyWithoutItemNestedInput
@@ -7293,6 +7319,7 @@ export namespace Prisma {
     finalPrice?: number | null
     startTime?: Date | string | null
     endTime?: Date | string | null
+    order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -7310,6 +7337,7 @@ export namespace Prisma {
     finalPrice?: NullableIntFieldUpdateOperationsInput | number | null
     startTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -7328,6 +7356,7 @@ export namespace Prisma {
     finalPrice?: NullableIntFieldUpdateOperationsInput | number | null
     startTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -7749,6 +7778,7 @@ export namespace Prisma {
     finalPrice?: SortOrder
     startTime?: SortOrder
     endTime?: SortOrder
+    order?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -7757,6 +7787,7 @@ export namespace Prisma {
     startingPrice?: SortOrder
     timerDuration?: SortOrder
     finalPrice?: SortOrder
+    order?: SortOrder
   }
 
   export type ItemMaxOrderByAggregateInput = {
@@ -7773,6 +7804,7 @@ export namespace Prisma {
     finalPrice?: SortOrder
     startTime?: SortOrder
     endTime?: SortOrder
+    order?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -7791,6 +7823,7 @@ export namespace Prisma {
     finalPrice?: SortOrder
     startTime?: SortOrder
     endTime?: SortOrder
+    order?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -7799,6 +7832,7 @@ export namespace Prisma {
     startingPrice?: SortOrder
     timerDuration?: SortOrder
     finalPrice?: SortOrder
+    order?: SortOrder
   }
 
   export type EnumAuctionTypeWithAggregatesFilter<$PrismaModel = never> = {
@@ -8724,6 +8758,7 @@ export namespace Prisma {
     finalPrice?: number | null
     startTime?: Date | string | null
     endTime?: Date | string | null
+    order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     bids?: BidCreateNestedManyWithoutItemInput
@@ -8742,6 +8777,7 @@ export namespace Prisma {
     finalPrice?: number | null
     startTime?: Date | string | null
     endTime?: Date | string | null
+    order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     bids?: BidUncheckedCreateNestedManyWithoutItemInput
@@ -8825,6 +8861,7 @@ export namespace Prisma {
     finalPrice?: IntNullableFilter<"Item"> | number | null
     startTime?: DateTimeNullableFilter<"Item"> | Date | string | null
     endTime?: DateTimeNullableFilter<"Item"> | Date | string | null
+    order?: IntFilter<"Item"> | number
     createdAt?: DateTimeFilter<"Item"> | Date | string
     updatedAt?: DateTimeFilter<"Item"> | Date | string
   }
@@ -8938,6 +8975,7 @@ export namespace Prisma {
     finalPrice?: number | null
     startTime?: Date | string | null
     endTime?: Date | string | null
+    order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     room: RoomCreateNestedOneWithoutItemsInput
@@ -8957,6 +8995,7 @@ export namespace Prisma {
     finalPrice?: number | null
     startTime?: Date | string | null
     endTime?: Date | string | null
+    order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -9019,6 +9058,7 @@ export namespace Prisma {
     finalPrice?: NullableIntFieldUpdateOperationsInput | number | null
     startTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     room?: RoomUpdateOneRequiredWithoutItemsNestedInput
@@ -9038,6 +9078,7 @@ export namespace Prisma {
     finalPrice?: NullableIntFieldUpdateOperationsInput | number | null
     startTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -9248,6 +9289,7 @@ export namespace Prisma {
     finalPrice?: number | null
     startTime?: Date | string | null
     endTime?: Date | string | null
+    order?: number
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -9265,6 +9307,7 @@ export namespace Prisma {
     finalPrice?: NullableIntFieldUpdateOperationsInput | number | null
     startTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     bids?: BidUpdateManyWithoutItemNestedInput
@@ -9283,6 +9326,7 @@ export namespace Prisma {
     finalPrice?: NullableIntFieldUpdateOperationsInput | number | null
     startTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     bids?: BidUncheckedUpdateManyWithoutItemNestedInput
@@ -9301,6 +9345,7 @@ export namespace Prisma {
     finalPrice?: NullableIntFieldUpdateOperationsInput | number | null
     startTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    order?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

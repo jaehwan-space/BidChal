@@ -129,3 +129,44 @@ export function useUploadImage() {
     },
   });
 }
+
+// 아이템 삭제
+export function useDeleteItem() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ roomId, itemId }: { roomId: string; itemId: string }) => {
+      const res = await fetch(`${API_URL}/rooms/${roomId}/items/${itemId}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || '아이템을 삭제하지 못했습니다.');
+      }
+      return res.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['room', variables.roomId] });
+    },
+  });
+}
+
+// 아이템 순서 변경
+export function useReorderItem() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ roomId, itemId, direction }: { roomId: string; itemId: string; direction: 'up' | 'down' }) => {
+      const res = await fetch(`${API_URL}/rooms/${roomId}/items/${itemId}/reorder`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ direction }),
+      });
+      if (!res.ok) throw new Error('순서 변경에 실패했습니다.');
+      return res.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['room', variables.roomId] });
+    },
+  });
+}

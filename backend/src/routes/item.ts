@@ -13,6 +13,9 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'name, startingPrice, auctionType are required' });
     }
 
+    // 기존 아이템 갯수를 파악하여 맨 뒤 요소의 order 결정
+    const count = await prisma.item.count({ where: { roomId } });
+
     const item = await prisma.item.create({
       data: {
         roomId,
@@ -21,7 +24,8 @@ router.post('/', async (req, res) => {
         startingPrice,
         auctionType, // 'OPEN' or 'BLIND'
         imageUrl,
-        timerDuration: timerDuration || 30
+        timerDuration: timerDuration || 30,
+        order: count
       }
     });
 
@@ -43,13 +47,68 @@ router.get('/', async (req, res) => {
     const { roomId } = req.params as { roomId: string };
     const items = await prisma.item.findMany({
       where: { roomId },
-      orderBy: { createdAt: 'asc' }
+      orderBy: [ { order: 'asc' }, { createdAt: 'asc' } ]
     });
     
     res.json(items);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to fetch items' });
+  }
+});
+
+// 아이템 삭제
+router.delete('/:itemId', async (req, res) => {
+  try {
+    const { roomId, itemId } = req.params as { roomId: string; itemId: string };
+    
+    const item = await prisma.item.findUnique({ where: { id: itemId } });
+    if (!item) return res.status(404).json({ error: 'Item not found' });
+    if (item.status !== 'PENDING') return res.status(400).json({ error: 'Cannot delete an item that already started' });
+
+    await prisma.item.delete({ where: { id: itemId } });
+
+    // 삭제된 아이템 위의 순서들을 당김
+    await prisma.item.updateMany({
+      where: { roomId, order: { gt: item.order } },
+      data: { order: { decrement: 1 } }
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to delete item' });
+  }
+});
+
+// 아이템 순서 변경
+router.put('/:itemId/reorder', async (req, res) => {
+  try {
+    const { roomId, itemId } = req.params as { roomId: string; itemId: string };
+    const { direction } = req.body as { direction: 'up' | 'down' };
+
+    const item = await prisma.item.findUnique({ where: { id: itemId } });
+    if (!item) return res.status(404).json({ error: 'Item not found' });
+
+    const targetOrder = direction === 'up' ? item.order - 1 : item.order + 1;
+
+    // 자리 바꿀 대상 찾기
+    const swapTarget = await prisma.item.findFirst({
+      where: { roomId, order: targetOrder }
+    });
+
+    if (!swapTarget) return res.status(400).json({ error: 'Invalid move' });
+
+    // 트랜잭션으로 순서 스왑
+    await prisma.$transaction([
+      prisma.item.update({ where: { id: item.id }, data: { order: targetOrder } }),
+      prisma.item.update({ where: { id: swapTarget.id }, data: { order: item.order } })
+    ]);
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to reorder item' });
   }
 });
 
