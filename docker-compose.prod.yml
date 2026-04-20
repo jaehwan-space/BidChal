@@ -25,7 +25,7 @@ services:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-bidchal_admin}:${POSTGRES_PASSWORD:-bidchal_password}@db:5432/${POSTGRES_DB:-bidchal_db}?schema=public
       - JWT_SECRET=${JWT_SECRET:-production_secret_key_change_me_later}
     volumes:
-      - bidchal_uploads:/app/uploads
+      - bidchal_uploads:/app/backend/uploads
     depends_on:
       - db
 
