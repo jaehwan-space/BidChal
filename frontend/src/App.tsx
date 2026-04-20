@@ -8,6 +8,7 @@ import { RoomSettings } from './pages/RoomSettings';
 import { HostControl } from './pages/HostControl';
 import { DisplayView } from './pages/DisplayView';
 import { Mypage } from './pages/Mypage';
+import { AdminDashboard } from './pages/AdminDashboard';
 import { useAuthStore } from './store/useAuthStore';
 
 import { ReactNode, useEffect } from 'react';
@@ -85,6 +86,14 @@ function App() {
               element={
                 <RequireAuth>
                   <Mypage />
+                </RequireAuth>
+              } 
+            />
+            <Route 
+              path="/admin" 
+              element={
+                <RequireAuth>
+                  <AdminDashboard />
                 </RequireAuth>
               } 
             />

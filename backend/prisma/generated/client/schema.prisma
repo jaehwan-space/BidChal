@@ -20,6 +20,17 @@ enum AuctionType {
   BLIND // 비공개 입찰 (상대방 입찰가 비공개, 지정 시간에 최고가 낙찰)
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
 enum ItemStatus {
   PENDING // 대기 중 (경매 시작 전)
   ACTIVE // 경매 진행 중
@@ -45,17 +56,20 @@ enum TransactionReason {
 // ------------------------------------
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
+  id        String     @id @default(uuid())
+  email     String     @unique
   username  String
   password  String
-  points    Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  points    Int        @default(0)
+  role      Role       @default(USER)
+  status    UserStatus @default(ACTIVE)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
   rooms        Room[]             @relation("HostRooms")
   bids         Bid[]
   transactions PointTransaction[]
+  coupons      Coupon[]           @relation("UsedCoupons")
 }
 
 model Room {
@@ -114,4 +128,16 @@ model PointTransaction {
   createdAt DateTime          @default(now())
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model Coupon {
+  id           String    @id @default(uuid())
+  code         String    @unique
+  rewardAmount Int
+  isUsed       Boolean   @default(false)
+  usedById     String?
+  usedAt       DateTime?
+  createdAt    DateTime  @default(now())
+
+  usedBy User? @relation("UsedCoupons", fields: [usedById], references: [id])
 }

@@ -128,6 +128,8 @@ exports.Prisma.UserScalarFieldEnum = {
   username: 'username',
   password: 'password',
   points: 'points',
+  role: 'role',
+  status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -177,6 +179,16 @@ exports.Prisma.PointTransactionScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.CouponScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  rewardAmount: 'rewardAmount',
+  isUsed: 'isUsed',
+  usedById: 'usedById',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -191,6 +203,17 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.Role = exports.$Enums.Role = {
+  USER: 'USER',
+  ADMIN: 'ADMIN'
+};
+
+exports.UserStatus = exports.$Enums.UserStatus = {
+  ACTIVE: 'ACTIVE',
+  SUSPENDED: 'SUSPENDED',
+  DELETED: 'DELETED'
+};
+
 exports.RoomStatus = exports.$Enums.RoomStatus = {
   WAITING: 'WAITING',
   ACTIVE: 'ACTIVE',
@@ -221,7 +244,8 @@ exports.Prisma.ModelName = {
   Room: 'Room',
   Item: 'Item',
   Bid: 'Bid',
-  PointTransaction: 'PointTransaction'
+  PointTransaction: 'PointTransaction',
+  Coupon: 'Coupon'
 };
 
 /**

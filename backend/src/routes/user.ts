@@ -5,14 +5,22 @@ import jwt from 'jsonwebtoken';
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_for_local_dev';
 
-export const authenticate = (req: any, res: Response, next: NextFunction) => {
+export const authenticate = async (req: any, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ error: 'No token provided' });
 
   const token = authHeader.split(' ')[1];
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    
+    // DB에서 상태 실시간 확인
+    const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
+    if (!user) return res.status(401).json({ error: '존재하지 않는 유저입니다.' });
+    if (user.status === 'SUSPENDED') return res.status(403).json({ error: '정지된 계정입니다.' });
+    if (user.status === 'DELETED') return res.status(403).json({ error: '탈퇴 처리된 계정입니다.' });
+
     req.user = decoded;
+    req.user.role = user.role; // req 객체에 최신 권한 포함
     next();
   } catch (err) {
     return res.status(401).json({ error: 'Invalid token' });
@@ -154,37 +162,56 @@ router.post('/gift', authenticate, async (req: any, res) => {
   }
 });
 
-// POST /api/users/coupon -> 쿠폰 코드 입력 또는 QR 스캔 텍스트
+// POST /api/users/coupon -> 쿠폰 코드 입력 (Data Model 기반)
 router.post('/coupon', authenticate, async (req: any, res) => {
   const userId = req.user.userId;
   const { code } = req.body;
 
   if (!code) return res.status(400).json({ error: '쿠폰 코드를 입력하세요.' });
 
-  let rewardAmount = 0;
-  // 간단한 Mock 쿠폰 로직
-  if (code.toUpperCase().includes('BIDCHAL-100')) rewardAmount = 100000;
-  else if (code.toUpperCase().includes('WELCOME')) rewardAmount = 50000;
-  else {
-    return res.status(400).json({ error: '유효하지 않은 쿠폰입니다.' });
-  }
-
   try {
+    const cleanCode = code.trim().toUpperCase();
+
     const updatedUser = await prisma.$transaction(async (tx) => {
+      // 1. 쿠폰 조회
+      const coupon = await tx.coupon.findUnique({ where: { code: cleanCode } });
+
+      if (!coupon) {
+        throw new Error('유효하지 않은 쿠폰입니다.');
+      }
+      if (coupon.isUsed) {
+        throw new Error('이미 사용된 쿠폰입니다.');
+      }
+
+      // 2. 쿠폰 사용 처리
+      await tx.coupon.update({
+        where: { id: coupon.id },
+        data: {
+          isUsed: true,
+          usedById: userId,
+          usedAt: new Date()
+        }
+      });
+
+      // 3. 유저 포인트 증가
       const user = await tx.user.update({
         where: { id: userId },
-        data: { points: { increment: rewardAmount } },
+        data: { points: { increment: coupon.rewardAmount } },
       });
+
+      // 4. 충전 내역 남기기
       await tx.pointTransaction.create({
-        data: { userId, amount: rewardAmount, reason: 'CHARGE' },
+        data: { userId, amount: coupon.rewardAmount, reason: 'CHARGE' },
       });
-      return user;
+
+      // 응답에 사용할 리워드 양을 user 객체에 심어 반환
+      return { user, rewardAmount: coupon.rewardAmount };
     });
 
-    res.json({ success: true, amount: rewardAmount, points: updatedUser.points });
-  } catch (error) {
+    res.json({ success: true, amount: updatedUser.rewardAmount, points: updatedUser.user.points });
+  } catch (error: any) {
     console.error('Coupon Error:', error);
-    res.status(500).json({ error: '쿠폰 처리에 실패했습니다.' });
+    res.status(400).json({ error: error.message || '쿠폰 처리에 실패했습니다.' });
   }
 });
 

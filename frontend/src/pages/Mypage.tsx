@@ -21,7 +21,7 @@ interface MypageData {
 }
 
 export function Mypage() {
-  const { token, updateUser, logout } = useAuthStore();
+  const { token, updateUser, logout, user } = useAuthStore();
   const navigate = useNavigate();
   const [data, setData] = useState<MypageData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -120,13 +120,21 @@ export function Mypage() {
     <div style={{ paddingBottom: '80px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
       
       {/* --- 프로필 섹션 --- */}
-      <div style={{ padding: '16px 8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ padding: '16px 8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 800 }}>{data.user.username}</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 800 }}>{data.user.username}</h2>
+            {user?.role === 'ADMIN' && (
+              <span style={{ padding: '4px 8px', borderRadius: '4px', background: 'var(--primary)', color: 'white', fontSize: '11px', fontWeight: 'bold' }}>ADMIN</span>
+            )}
+          </div>
           <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{data.user.email}</span>
           <span style={{ fontSize: '13px', color: 'var(--text-secondary)', display: 'block' }}>가입일: {new Date(data.user.createdAt).toLocaleDateString()}</span>
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          {user?.role === 'ADMIN' && (
+            <Button variant="primary" onClick={() => navigate('/admin')}>관리자 패널</Button>
+          )}
           <Button variant="secondary" onClick={() => setActiveModal('profile')}>프로필 수정</Button>
           <Button variant="danger" onClick={() => { logout(); navigate('/login'); }}>로그아웃</Button>
         </div>

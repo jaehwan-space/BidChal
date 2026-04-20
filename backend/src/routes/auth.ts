@@ -50,18 +50,25 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: '이메일 또는 비밀번호가 올바르지 않습니다.' });
     }
 
+    if (user.status === 'SUSPENDED') {
+      return res.status(403).json({ error: '관리자에 의해 정지된 계정입니다. 고객센터에 문의하세요.' });
+    }
+    if (user.status === 'DELETED') {
+      return res.status(403).json({ error: '탈퇴 처리된 계정입니다.' });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ error: '이메일 또는 비밀번호가 올바르지 않습니다.' });
     }
 
     const token = jwt.sign(
-      { userId: user.id, username: user.username },
+      { userId: user.id, username: user.username, role: user.role, status: user.status },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
 
-    res.json({ token, user: { id: user.id, email: user.email, username: user.username, points: user.points } });
+    res.json({ token, user: { id: user.id, email: user.email, username: user.username, points: user.points, role: user.role } });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Login failed' });
