@@ -1,9 +1,9 @@
-FROM node:20-alpine
+FROM node:20-slim
 
 WORKDIR /app
 
-# Alpine 리눅스에 Prisma 필수 패키지(OpenSSL) 설치
-RUN apk add --no-cache openssl
+# Debian 리눅스에 Prisma 필수 패키지(OpenSSL) 설치
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 # pnpm 직접 설치 (corepack 네트워크 오류 방지)
 RUN npm install -g pnpm@10
