@@ -80,7 +80,7 @@ export function Mypage() {
       const res = await fetch('/api/users/gift', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ targetUsername: giftTarget, amount: Number(giftAmount) })
+        body: JSON.stringify({ targetEmail: giftTarget, amount: Number(giftAmount) })
       });
       const resData = await res.json();
       if (!res.ok) throw new Error(resData.error || 'Failed');
@@ -243,7 +243,7 @@ export function Mypage() {
             {/* 선물하기 */}
             {activeModal === 'gift' && (
               <form onSubmit={handleGift} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <Input label="선물 할 계정(닉네임)" value={giftTarget} onChange={e => setGiftTarget(e.target.value)} placeholder="받는 사람 닉네임" />
+                <Input label="선물 할 계정(이메일)" value={giftTarget} onChange={e => setGiftTarget(e.target.value)} placeholder="받는 사람 이메일" />
                 <Input label="금액" type="number" value={giftAmount} onChange={e => setGiftAmount(e.target.value)} placeholder="보낼 금액 입력" />
                 <Button variant="primary" type="submit">선물 쏘기 💸</Button>
               </form>

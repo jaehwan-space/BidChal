@@ -120,22 +120,22 @@ router.put('/profile', authenticate, async (req: any, res) => {
 // POST /api/users/gift -> 다른 유저에게 포인트 선물
 router.post('/gift', authenticate, async (req: any, res) => {
   const senderId = req.user.userId;
-  const { targetUsername, amount } = req.body;
+  const { targetEmail, amount } = req.body;
 
-  if (!targetUsername || !amount || amount <= 0) {
-    return res.status(400).json({ error: '올바른 수신자와 금액을 입력하세요.' });
+  if (!targetEmail || !amount || amount <= 0) {
+    return res.status(400).json({ error: '올바른 수신자 이메일과 금액을 입력하세요.' });
   }
 
   try {
     await prisma.$transaction(async (tx) => {
       const sender = await tx.user.findUnique({ where: { id: senderId } });
-      const receiver = await tx.user.findFirst({ where: { username: targetUsername } });
+      const receiver = await tx.user.findUnique({ where: { email: targetEmail } });
 
       if (!sender || sender.points < amount) {
         throw new Error('잔액이 부족합니다.');
       }
       if (!receiver || receiver.id === senderId) {
-        throw new Error('올바르지 않은 대상입니다.');
+        throw new Error('가입되지 않은 이메일이거나 올바르지 않은 대상입니다.');
       }
 
       await tx.user.update({ where: { id: senderId }, data: { points: { decrement: amount } } });
