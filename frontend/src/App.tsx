@@ -10,6 +10,7 @@ import { DisplayView } from './pages/DisplayView';
 import { Mypage } from './pages/Mypage';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { useAuthStore } from './store/useAuthStore';
+import { Toaster } from 'react-hot-toast';
 
 import { ReactNode, useEffect } from 'react';
 import { useThemeStore } from './store/useThemeStore';
@@ -32,10 +33,12 @@ function App() {
   }, [theme]);
 
   return (
-    <Routes>
-      {/* 디스플레이 뷰 - Layout 없이 풀스크린 (로그인 필요) */}
-      <Route 
-        path="/room/:id/display" 
+    <>
+      <Toaster position="top-center" reverseOrder={false} toastOptions={{ duration: 3000, style: { background: 'var(--card-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', backdropFilter: 'blur(8px)' } }} />
+      <Routes>
+        {/* 디스플레이 뷰 - Layout 없이 풀스크린 (로그인 필요) */}
+        <Route 
+          path="/room/:id/display" 
         element={
           <RequireAuth>
             <DisplayView />
@@ -101,6 +104,7 @@ function App() {
         </Layout>
       } />
     </Routes>
+    </>
   );
 }
 
