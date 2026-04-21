@@ -19,6 +19,7 @@ export function useAdminUsers() {
       if (!res.ok) throw new Error('유저 목록을 불러오지 못했습니다.');
       return res.json();
     },
+    refetchInterval: 5000,
   });
 }
 
@@ -61,6 +62,7 @@ export function useAdminRooms() {
       if (!res.ok) throw new Error('경매방 목록을 불러오지 못했습니다.');
       return res.json();
     },
+    refetchInterval: 5000,
   });
 }
 
@@ -89,6 +91,7 @@ export function useAdminCoupons() {
       if (!res.ok) throw new Error('쿠폰 목록을 불러오지 못했습니다.');
       return res.json();
     },
+    refetchInterval: 5000,
   });
 }
 

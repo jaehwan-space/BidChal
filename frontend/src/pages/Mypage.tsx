@@ -92,6 +92,10 @@ export function Mypage() {
   };
 
   const submitCoupon = async (code: string) => {
+    if (!code) {
+      toast.error('쿠폰 번호를 입력해주세요.');
+      return;
+    }
     try {
       const res = await fetch('/api/users/coupon', {
         method: 'POST',
@@ -99,18 +103,31 @@ export function Mypage() {
         body: JSON.stringify({ code })
       });
       const resData = await res.json();
-      if (!res.ok) throw new Error(resData.error || 'Failed');
-      toast.success(`${resData.amount.toLocaleString()} 포인트가 충전되었습니다!`);
+      if (!res.ok) {
+        // 백엔드에서 전달된 구체적인 에러 메시지 활용
+        throw new Error(resData.error || '잘못된 쿠폰 번호이거나 이미 사용된 쿠폰입니다.');
+      }
+      toast.success(`${resData.points?.toLocaleString() || ''} 포인트가 성공적으로 충전되었습니다! 🎉`);
       setShowQR(false);
       setActiveModal('none');
       setCouponCode('');
       fetchMypage();
-    } catch (error: any) { toast.error(error.message); }
+    } catch (error: any) { 
+      // 에러 메시지가 구체적이지 않을 경우를 대비해 덧붙임
+      const errMsg = error.message;
+      if (errMsg.includes('유효하지 않은')) {
+        toast.error('❌ 유효하지 않은 쿠폰 번호입니다. 코드를 다시 확인해주세요.');
+      } else if (errMsg.includes('이미 사용된')) {
+        toast.error('⚠️ 이미 사용 완료된 쿠폰 번호입니다.');
+      } else {
+        toast.error(`❌ ${errMsg}`);
+      }
+    }
   };
 
   const handleChargeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (couponCode) await submitCoupon(couponCode);
+    await submitCoupon(couponCode);
   };
 
   if (loading) return <div style={{ padding: '24px' }}><Skeleton height={200} /><Skeleton height={400} style={{ marginTop: '20px' }} /></div>;
