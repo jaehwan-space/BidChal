@@ -18,7 +18,7 @@ export function AdminDashboard() {
       <div style={{ textAlign: 'center', padding: '100px 0', color: 'var(--danger)' }}>
         <ShieldAlert size={64} style={{ marginBottom: '16px' }} />
         <h2>접근 권한이 없습니다</h2>
-        <p>어드민만 접근할 수 있는 페이지입니다.</p>
+        <p>관리자만 접근할 수 있는 페이지입니다.</p>
         <Button onClick={() => navigate('/')} style={{ marginTop: '24px' }}>메인으로 돌아가기</Button>
       </div>
     );
@@ -27,7 +27,7 @@ export function AdminDashboard() {
   return (
     <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '24px' }}>
       <div>
-        <h1 style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><ShieldAlert color="var(--primary)" /> 어드민 대시보드</h1>
+        <h1 style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><ShieldAlert color="var(--primary)" /> 관리자 대시보드</h1>
         <p style={{ color: 'var(--text-secondary)' }}>전체 시스템(유저 관리, 방 관리, 쿠폰 발행)을 제어할 수 있습니다.</p>
       </div>
 
@@ -91,11 +91,11 @@ function AdminUsers() {
                   {u.role !== 'ADMIN' && (
                     <>
                       {u.status === 'ACTIVE' ? (
-                        <button title="정지 처리" onClick={() => updateStatusMutation.mutate({ userId: u.id, status: 'SUSPENDED' })} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--danger)' }}><Ban size={18}/></button>
+                        <button title="정지 처리" onClick={() => updateStatusMutation.mutate({ userId: u.id, status: 'SUSPENDED' })} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--danger)' }}><Ban size={18} /></button>
                       ) : (
-                        <button title="정지 해제" onClick={() => updateStatusMutation.mutate({ userId: u.id, status: 'ACTIVE' })} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--success)' }}><CheckCircle2 size={18}/></button>
+                        <button title="정지 해제" onClick={() => updateStatusMutation.mutate({ userId: u.id, status: 'ACTIVE' })} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--success)' }}><CheckCircle2 size={18} /></button>
                       )}
-                      <button title="탈퇴 처리 (복구 불가 상태)" onClick={() => updateStatusMutation.mutate({ userId: u.id, status: 'DELETED' })} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}><Trash2 size={18}/></button>
+                      <button title="탈퇴 처리 (복구 불가 상태)" onClick={() => updateStatusMutation.mutate({ userId: u.id, status: 'DELETED' })} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}><Trash2 size={18} /></button>
                     </>
                   )}
                 </td>
@@ -104,7 +104,7 @@ function AdminUsers() {
           </tbody>
         </table>
       </div>
-      
+
       {selectedUserId && (
         <UserLogsModal userId={selectedUserId} onClose={() => setSelectedUserId(null)} />
       )}
@@ -155,7 +155,7 @@ function AdminCoupons() {
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    if(window.confirm(`포인트 ${rewardAmount}P 쿠폰을 ${count}개 발행하시겠습니까?`)) {
+    if (window.confirm(`포인트 ${rewardAmount}P 쿠폰을 ${count}개 발행하시겠습니까?`)) {
       createCoupons.mutate({ rewardAmount, count });
     }
   }
@@ -194,7 +194,7 @@ function AdminCoupons() {
                   <td style={{ padding: '12px 8px', fontFamily: 'monospace', fontWeight: 'bold' }}>{c.code}</td>
                   <td style={{ padding: '12px 8px', color: 'var(--primary)' }}>{c.rewardAmount.toLocaleString()}P</td>
                   <td style={{ padding: '12px 8px' }}>
-                    <span style={{ fontSize: '12px', padding: '4px 8px', borderRadius: '12px', backgroundColor: c.isUsed ? '#eee' : 'rgba(49,130,246,0.1)', color: c.isUsed ? '#666' : 'var(--primary)'}}>
+                    <span style={{ fontSize: '12px', padding: '4px 8px', borderRadius: '12px', backgroundColor: c.isUsed ? '#eee' : 'rgba(49,130,246,0.1)', color: c.isUsed ? '#666' : 'var(--primary)' }}>
                       {c.isUsed ? '사용됨' : '미사용'}
                     </span>
                   </td>
@@ -208,7 +208,7 @@ function AdminCoupons() {
                   </td>
                   <td style={{ padding: '12px 8px', textAlign: 'right' }}>
                     {!c.isUsed && (
-                       <button onClick={() => deleteCoupon.mutate(c.id)} title="쿠폰 폐기" disabled={deleteCoupon.isPending} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--danger)' }}><Trash2 size={16}/></button>
+                      <button onClick={() => deleteCoupon.mutate(c.id)} title="쿠폰 폐기" disabled={deleteCoupon.isPending} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--danger)' }}><Trash2 size={16} /></button>
                     )}
                   </td>
                 </tr>
@@ -242,12 +242,12 @@ function AdminRooms() {
               </div>
               <span style={{ fontSize: '12px', padding: '4px 8px', borderRadius: '8px', background: 'var(--bg-color)' }}>{r.status}</span>
             </div>
-            
+
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '16px', borderTop: '1px dashed var(--border-color)' }}>
               <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>등록된 아이템: {r._count.items}개</div>
-              <button 
+              <button
                 onClick={() => {
-                  if(window.confirm('이 방과 내부에 포함된 모든 아이템 기록을 영구적으로 삭제합니까?')) deleteRoom.mutate(r.id);
+                  if (window.confirm('이 방과 내부에 포함된 모든 아이템 기록을 영구적으로 삭제합니까?')) deleteRoom.mutate(r.id);
                 }}
                 disabled={deleteRoom.isPending}
                 style={{ padding: '6px', cursor: 'pointer', border: 'none', background: 'rgba(240,68,82,0.1)', color: 'var(--danger)', borderRadius: '6px', display: 'flex', alignItems: 'center' }}
