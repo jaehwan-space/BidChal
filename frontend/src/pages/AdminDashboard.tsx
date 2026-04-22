@@ -95,8 +95,6 @@ function AdminUsers() {
     );
   };
 
-  if (isLoading) return <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)' }}>유저 목록 로딩 중...</div>;
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       {/* 검색 & 필터 바 */}
@@ -168,44 +166,50 @@ function AdminUsers() {
               </tr>
             </thead>
             <tbody>
-              {users?.map((u: any) => (
-                <tr key={u.id} style={{ borderBottom: '1px solid var(--border-color)', background: selectedUserIds.has(u.id) ? 'rgba(49,130,246,0.04)' : 'transparent' }}>
-                  <td style={{ padding: '12px 8px' }}>
-                    <input type="checkbox" checked={selectedUserIds.has(u.id)} onChange={() => toggleSelectUser(u.id)} />
-                  </td>
-                  <td style={{ padding: '12px 8px', fontWeight: 600 }}>{u.username}</td>
-                  <td style={{ padding: '12px 8px', color: 'var(--text-secondary)', fontSize: '13px' }}>{u.email}</td>
-                  <td style={{ padding: '12px 8px', fontSize: '13px' }}>{new Date(u.createdAt).toLocaleDateString()}</td>
-                  <td style={{ padding: '12px 8px', fontWeight: 'bold' }}>{u.points.toLocaleString()}P</td>
-                  <td style={{ padding: '12px 8px' }}>
-                    <StatusBadge status={u.status} />
-                  </td>
-                  <td style={{ padding: '12px 8px' }}>
-                    <span style={{ fontSize: '12px', padding: '3px 8px', borderRadius: '4px', background: u.role === 'ADMIN' ? 'var(--primary)' : 'var(--border-color)', color: u.role === 'ADMIN' ? '#fff' : 'var(--text-secondary)', fontWeight: 'bold' }}>
-                      {u.role}
-                    </span>
-                  </td>
-                  <td style={{ padding: '12px 8px' }}>
-                    <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-                      <Button variant="secondary" size="sm" onClick={() => setSelectedUserId(u.id)}>로그</Button>
-                      {u.role !== 'ADMIN' && (
-                        <>
-                          {u.status === 'ACTIVE' ? (
-                            <button title="정지" onClick={() => updateStatusMutation.mutate({ userId: u.id, status: 'SUSPENDED' })} style={iconBtnStyle('var(--danger)')}><Ban size={16} /></button>
-                          ) : u.status === 'SUSPENDED' ? (
-                            <button title="해제" onClick={() => updateStatusMutation.mutate({ userId: u.id, status: 'ACTIVE' })} style={iconBtnStyle('var(--success)')}><CheckCircle2 size={16} /></button>
-                          ) : null}
-                          {u.status !== 'DELETED' && (
-                            <button title="탈퇴" onClick={() => { if (window.confirm(`${u.username} 을(를) 탈퇴 처리 하시겠습니까?`)) updateStatusMutation.mutate({ userId: u.id, status: 'DELETED' }); }} style={iconBtnStyle('var(--text-secondary)')}><Trash2 size={16} /></button>
+              {isLoading && users === undefined ? (
+                <tr><td colSpan={8} style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>유저 목록 로딩 중...</td></tr>
+              ) : (
+                <>
+                  {users?.map((u: any) => (
+                    <tr key={u.id} style={{ borderBottom: '1px solid var(--border-color)', background: selectedUserIds.has(u.id) ? 'rgba(49,130,246,0.04)' : 'transparent' }}>
+                      <td style={{ padding: '12px 8px' }}>
+                        <input type="checkbox" checked={selectedUserIds.has(u.id)} onChange={() => toggleSelectUser(u.id)} />
+                      </td>
+                      <td style={{ padding: '12px 8px', fontWeight: 600 }}>{u.username}</td>
+                      <td style={{ padding: '12px 8px', color: 'var(--text-secondary)', fontSize: '13px' }}>{u.email}</td>
+                      <td style={{ padding: '12px 8px', fontSize: '13px' }}>{new Date(u.createdAt).toLocaleDateString()}</td>
+                      <td style={{ padding: '12px 8px', fontWeight: 'bold' }}>{u.points.toLocaleString()}P</td>
+                      <td style={{ padding: '12px 8px' }}>
+                        <StatusBadge status={u.status} />
+                      </td>
+                      <td style={{ padding: '12px 8px' }}>
+                        <span style={{ fontSize: '12px', padding: '3px 8px', borderRadius: '4px', background: u.role === 'ADMIN' ? 'var(--primary)' : 'var(--border-color)', color: u.role === 'ADMIN' ? '#fff' : 'var(--text-secondary)', fontWeight: 'bold' }}>
+                          {u.role}
+                        </span>
+                      </td>
+                      <td style={{ padding: '12px 8px' }}>
+                        <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                          <Button variant="secondary" size="sm" onClick={() => setSelectedUserId(u.id)}>로그</Button>
+                          {u.role !== 'ADMIN' && (
+                            <>
+                              {u.status === 'ACTIVE' ? (
+                                <button title="정지" onClick={() => updateStatusMutation.mutate({ userId: u.id, status: 'SUSPENDED' })} style={iconBtnStyle('var(--danger)')}><Ban size={16} /></button>
+                              ) : u.status === 'SUSPENDED' ? (
+                                <button title="해제" onClick={() => updateStatusMutation.mutate({ userId: u.id, status: 'ACTIVE' })} style={iconBtnStyle('var(--success)')}><CheckCircle2 size={16} /></button>
+                              ) : null}
+                              {u.status !== 'DELETED' && (
+                                <button title="탈퇴" onClick={() => { if (window.confirm(`${u.username} 을(를) 탈퇴 처리 하시겠습니까?`)) updateStatusMutation.mutate({ userId: u.id, status: 'DELETED' }); }} style={iconBtnStyle('var(--text-secondary)')}><Trash2 size={16} /></button>
+                              )}
+                            </>
                           )}
-                        </>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {users?.length === 0 && (
-                <tr><td colSpan={8} style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>검색 결과가 없습니다.</td></tr>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {users?.length === 0 && (
+                    <tr><td colSpan={8} style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>검색 결과가 없습니다.</td></tr>
+                  )}
+                </>
               )}
             </tbody>
           </table>

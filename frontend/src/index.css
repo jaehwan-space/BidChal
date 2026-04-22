@@ -112,4 +112,22 @@ h1 {
 @keyframes slideUp {
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
+}/* Global Form Elements for Dark Mode Compatibility */
+select {
+  color: var(--text-primary);
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  color-scheme: dark light;
+}
+
+select option {
+  color: var(--text-primary);
+  background-color: var(--panel-bg);
+}
+
+[data-theme='light'] select {
+  color-scheme: light;
+}
+[data-theme='dark'] select {
+  color-scheme: dark;
 }

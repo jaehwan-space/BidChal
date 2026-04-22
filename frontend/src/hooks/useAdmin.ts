@@ -41,6 +41,7 @@ export function useAdminUserLogs(userId: string | null) {
       return res.json();
     },
     enabled: !!userId,
+    refetchInterval: 3000,
   });
 }
 
