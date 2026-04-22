@@ -40,6 +40,23 @@ export function Mypage() {
   const [couponCode, setCouponCode] = useState('');
   const [showQR, setShowQR] = useState(false);
 
+  // Drag to close states
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
+  const [touchMoveY, setTouchMoveY] = useState<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => setTouchStartY(e.touches[0].clientY);
+  const handleTouchMove = (e: React.TouchEvent) => setTouchMoveY(e.touches[0].clientY);
+  const handleTouchEnd = () => {
+    if (touchStartY !== null && touchMoveY !== null) {
+      if (touchMoveY - touchStartY > 80) {
+        setActiveModal('none');
+        setShowQR(false);
+      }
+    }
+    setTouchStartY(null);
+    setTouchMoveY(null);
+  };
+
   useEffect(() => {
     if (!token) { navigate('/login'); return; }
     fetchMypage();
@@ -239,22 +256,29 @@ export function Mypage() {
             }} 
             onClick={(e) => e.stopPropagation()}
           >
-            {/* 드래그 핸들 바 */}
-            <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 4px' }}>
-              <div style={{ width: '40px', height: '4px', borderRadius: '2px', background: 'var(--border-color)' }} />
-            </div>
+            {/* 드래그 핸들 및 제목 영억 */}
+            <div 
+              style={{ paddingBottom: '12px' }}
+              onTouchStart={handleTouchStart} 
+              onTouchMove={handleTouchMove} 
+              onTouchEnd={handleTouchEnd}
+            >
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 16px' }}>
+                <div style={{ width: '40px', height: '4px', borderRadius: '2px', background: 'var(--border-color)', cursor: 'grab' }} />
+              </div>
 
-            {/* 제목 및 닫기 */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ margin: 0, fontSize: '20px', fontWeight: 700 }}>
-                {activeModal === 'profile' ? '프로필 수정' : activeModal === 'gift' ? '포인트 선물하기' : '포인트 충전'}
-              </h3>
+              {/* 제목 및 닫기 */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 style={{ margin: 0, fontSize: '20px', fontWeight: 700 }}>
+                  {activeModal === 'profile' ? '프로필 수정' : activeModal === 'gift' ? '포인트 선물하기' : '포인트 충전'}
+                </h3>
               <button 
                 onClick={() => { setActiveModal('none'); setShowQR(false); }} 
                 style={{ background: 'var(--bg-color)', border: 'none', width: '32px', height: '32px', borderRadius: '50%', fontSize: '18px', cursor: 'pointer', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
                 ✕
               </button>
+              </div>
             </div>
 
             {/* 프로필 수정 */}

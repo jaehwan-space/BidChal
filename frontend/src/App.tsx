@@ -34,7 +34,7 @@ function App() {
 
   return (
     <>
-      <Toaster position="top-center" reverseOrder={false} toastOptions={{ duration: 3000, style: { background: 'var(--card-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', backdropFilter: 'blur(8px)' } }} />
+      <Toaster position="top-center" reverseOrder={false} containerStyle={{ zIndex: 999999 }} toastOptions={{ duration: 3000, style: { background: 'var(--card-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', backdropFilter: 'blur(8px)' } }} />
       <Routes>
         {/* 디스플레이 뷰 - Layout 없이 풀스크린 (로그인 필요) */}
         <Route 
