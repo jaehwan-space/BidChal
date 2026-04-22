@@ -198,9 +198,7 @@ export function DisplayView() {
                   <img src={activeState.item.imageUrl} alt={activeState.item.name}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
-                  <div style={{ color: 'rgba(255,255,255,0.3)' }}>
-                    <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
-                  </div>
+                  <span style={{ fontSize: '120px' }}>📦</span>
                 )}
               </div>
 
@@ -283,12 +281,10 @@ export function DisplayView() {
             exit={{ opacity: 0 }}
             style={{ textAlign: 'center' }}>
             <motion.div animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1 }}
-              style={{ marginBottom: '24px', color: 'var(--success)', display: 'flex', justifyContent: 'center' }}>
-               <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
-            </motion.div>
-            <h1 style={{ fontSize: '64px', fontWeight: 800, margin: 0, color: 'var(--primary)' }}>낙찰!</h1>
+              style={{ fontSize: '120px', marginBottom: '24px' }}>🎉</motion.div>
+            <h1 style={{ fontSize: '64px', fontWeight: 800, margin: 0, color: '#FF6F00' }}>낙찰!</h1>
             <p style={{ fontSize: '36px', marginTop: '16px' }}>{soldInfo.itemName}</p>
-            <p className="toss-amount-display" style={{ fontSize: '64px', margin: '32px 0' }}>{soldInfo.finalPrice.toLocaleString()} <span className="currency-label">P</span></p>
+            <p style={{ fontSize: '48px', fontWeight: 700, margin: '16px 0' }}>{soldInfo.finalPrice.toLocaleString()} P</p>
             <p style={{ fontSize: '28px', color: 'rgba(255,255,255,0.6)' }}>낙찰자: {soldInfo.winnerName}</p>
           </motion.div>
         )}
@@ -297,9 +293,10 @@ export function DisplayView() {
         {phase === 'passed' && passedInfo && (
           <motion.div key="passed" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '120px', marginBottom: '24px' }}>😔</div>
             <h1 style={{ fontSize: '64px', fontWeight: 800, margin: 0, color: '#8B95A1' }}>유찰</h1>
             <p style={{ fontSize: '36px', marginTop: '16px', color: 'rgba(255,255,255,0.5)' }}>
-              {passedInfo.itemName} — 조건에 맞는 입찰이 없어요.
+              {passedInfo.itemName} — 입찰자가 없습니다
             </p>
           </motion.div>
         )}
@@ -308,9 +305,7 @@ export function DisplayView() {
         {phase === 'ended' && (
           <motion.div key="ended" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             style={{ textAlign: 'center' }}>
-            <div style={{ marginBottom: '24px', color: 'rgba(255,255,255,0.5)', display: 'flex', justifyContent: 'center' }}>
-              <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>
-            </div>
+            <div style={{ fontSize: '100px', marginBottom: '24px' }}>🏁</div>
             <h1 style={{ fontSize: '56px', fontWeight: 800, margin: 0 }}>경매가 종료되었습니다</h1>
             <p style={{ fontSize: '24px', color: 'rgba(255,255,255,0.5)', marginTop: '16px' }}>
               참여해주셔서 감사합니다!

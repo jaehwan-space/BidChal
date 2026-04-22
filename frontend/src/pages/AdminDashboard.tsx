@@ -224,12 +224,10 @@ function AdminUsers() {
       {/* 일괄 포인트 모달 */}
       {showBatchModal && (
         <ModalOverlay onClose={() => setShowBatchModal(false)}>
-          <h3 className="toss-heading-lg" style={{ margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Coins size={24} color="var(--primary)" /> 일괄 포인트 지급
-          </h3>
-          <p className="toss-body" style={{ marginBottom: '16px' }}>선택된 {selectedUserIds.size}명의 유저에게 포인트를 지급합니다.</p>
-          <Input label="지급 포인트" type="number" value={batchAmount} onChange={e => setBatchAmount(Number(e.target.value))} min={1} />
-          <div style={{ display: 'flex', gap: '8px', marginTop: '24px', justifyContent: 'flex-end' }}>
+          <h3 style={{ margin: '0 0 16px 0' }}>🪙 일괄 포인트 지급</h3>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>선택된 {selectedUserIds.size}명의 유저에게 포인트를 지급합니다.</p>
+          <Input label="지급 포인트 (P)" type="number" value={batchAmount} onChange={e => setBatchAmount(Number(e.target.value))} min={1} />
+          <div style={{ display: 'flex', gap: '8px', marginTop: '16px', justifyContent: 'flex-end' }}>
             <Button variant="secondary" onClick={() => setShowBatchModal(false)}>취소</Button>
             <Button variant="primary" onClick={handleBatchCharge} disabled={batchChargeMutation.isPending}>
               {batchChargeMutation.isPending ? '처리 중...' : `${selectedUserIds.size}명에게 지급`}

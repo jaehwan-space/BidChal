@@ -315,16 +315,14 @@ export function Room() {
             <Card title="">
               <div style={{ textAlign: 'center', padding: '32px 16px' }}>
                 <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ repeat: Infinity, duration: 0.5 }}
-                  style={{ marginBottom: '16px', color: 'var(--success)', display: 'flex', justifyContent: 'center' }}>
-                  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
-                </motion.div>
-                <h2 className="toss-heading-lg" style={{ margin: '0 0 8px 0', color: 'var(--primary)' }}>낙찰!</h2>
-                <p className="toss-heading" style={{ margin: '0 0 4px 0' }}>{soldInfo.itemName}</p>
-                <p className="toss-amount-display" style={{ margin: '8px 0' }}>{soldInfo.finalPrice.toLocaleString()} <span className="currency-label">P</span></p>
-                <p className="toss-body">낙찰자: {soldInfo.winnerName}</p>
+                  style={{ fontSize: '64px', marginBottom: '16px' }}>🎉</motion.div>
+                <h2 style={{ margin: '0 0 8px 0', color: 'var(--primary)' }}>낙찰!</h2>
+                <p style={{ fontSize: '20px', margin: '0 0 4px 0' }}>{soldInfo.itemName}</p>
+                <p style={{ fontSize: '32px', fontWeight: 800, margin: '8px 0' }}>{soldInfo.finalPrice.toLocaleString()} P</p>
+                <p style={{ color: 'var(--text-secondary)' }}>낙찰자: {soldInfo.winnerName}</p>
                 {soldInfo.winnerName === user?.username && (
-                  <div style={{ marginTop: '16px', padding: '12px', background: 'var(--primary-light)', borderRadius: 'var(--radius-standard)', color: 'var(--primary)', fontWeight: 600 }}>
-                    축하합니다! 낙찰 처리되었어요.
+                  <div style={{ marginTop: '16px', padding: '12px', background: 'rgba(255,111,0,0.1)', borderRadius: 'var(--border-radius-sm)', color: 'var(--primary)', fontWeight: 600 }}>
+                    🏆 축하합니다! 낙찰되었습니다!
                   </div>
                 )}
               </div>
@@ -337,11 +335,9 @@ export function Room() {
           <motion.div key="passed" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <Card title="">
               <div style={{ textAlign: 'center', padding: '32px 16px' }}>
-                <div style={{ marginBottom: '16px', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'center' }}>
-                  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" x2="16" y1="15" y2="15"/><line x1="9" x2="9.01" y1="9" y2="9"/><line x1="15" x2="15.01" y1="9" y2="9"/></svg>
-                </div>
-                <h2 className="toss-heading-lg" style={{ margin: '0 0 8px 0', color: 'var(--text-secondary)' }}>유찰</h2>
-                <p className="toss-body">다음 아이템을 기다려주세요</p>
+                <div style={{ fontSize: '64px', marginBottom: '16px' }}>😔</div>
+                <h2 style={{ margin: '0 0 8px 0', color: 'var(--text-secondary)' }}>유찰</h2>
+                <p style={{ color: 'var(--text-secondary)' }}>다음 아이템을 기다려주세요</p>
               </div>
             </Card>
           </motion.div>
@@ -352,11 +348,9 @@ export function Room() {
           <motion.div key="ended" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <Card title="">
               <div style={{ textAlign: 'center', padding: '32px 16px' }}>
-                <div style={{ marginBottom: '16px', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'center' }}>
-                  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>
-                </div>
-                <h2 className="toss-heading-lg" style={{ margin: '0 0 8px 0' }}>경매 종료</h2>
-                <p className="toss-body">참여해주셔서 감사합니다!</p>
+                <div style={{ fontSize: '64px', marginBottom: '16px' }}>🏁</div>
+                <h2 style={{ margin: '0 0 8px 0' }}>경매 종료</h2>
+                <p style={{ color: 'var(--text-secondary)' }}>참여해주셔서 감사합니다!</p>
               </div>
             </Card>
           </motion.div>
