@@ -100,8 +100,8 @@ export function Mypage() {
         body: JSON.stringify({ targetEmail: giftTarget, amount: Number(giftAmount) })
       });
       const resData = await res.json();
-      if (!res.ok) throw new Error(resData.error || 'Failed');
-      toast.success(`${giftTarget}님에게 ${Number(giftAmount).toLocaleString()}P를 선물했습니다.`);
+      if (!res.ok) throw new Error(resData.error || '실패했어요');
+      toast.success(`${giftTarget}님에게 ${Number(giftAmount).toLocaleString()}P를 보냈어요.`);
       setActiveModal('none');
       setGiftTarget(''); setGiftAmount('');
       fetchMypage();
@@ -124,7 +124,7 @@ export function Mypage() {
         // 백엔드에서 전달된 구체적인 에러 메시지 활용
         throw new Error(resData.error || '잘못된 쿠폰 번호이거나 이미 사용된 쿠폰입니다.');
       }
-      toast.success(`${resData.points?.toLocaleString() || ''} 포인트가 성공적으로 충전되었습니다! 🎉`);
+      toast.success(`${resData.points?.toLocaleString() || ''} 포인트 충전이 완료되었어요.`);
       setShowQR(false);
       setActiveModal('none');
       setCouponCode('');
@@ -133,11 +133,11 @@ export function Mypage() {
       // 에러 메시지가 구체적이지 않을 경우를 대비해 덧붙임
       const errMsg = error.message;
       if (errMsg.includes('유효하지 않은')) {
-        toast.error('❌ 유효하지 않은 쿠폰 번호입니다. 코드를 다시 확인해주세요.');
+        toast.error('유효하지 않은 쿠폰 번호예요. 코드를 다시 확인해주세요.');
       } else if (errMsg.includes('이미 사용된')) {
-        toast.error('⚠️ 이미 사용 완료된 쿠폰 번호입니다.');
+        toast.error('이미 사용 완료된 쿠폰 번호예요.');
       } else {
-        toast.error(`❌ ${errMsg}`);
+        toast.error(`${errMsg}`);
       }
     }
   };
@@ -157,13 +157,12 @@ export function Mypage() {
       <div style={{ padding: '16px 8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 800 }}>{data.user.username}</h2>
+            <h2 className="toss-heading-lg" style={{ margin: 0 }}>{data.user.username}</h2>
             {user?.role === 'ADMIN' && (
               <span style={{ padding: '4px 8px', borderRadius: '4px', background: 'var(--primary)', color: 'white', fontSize: '11px', fontWeight: 'bold' }}>ADMIN</span>
             )}
           </div>
-          <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{data.user.email}</span>
-          <span style={{ fontSize: '13px', color: 'var(--text-secondary)', display: 'block' }}>가입일: {new Date(data.user.createdAt).toLocaleDateString()}</span>
+          <span className="toss-body">{data.user.email}</span>
         </div>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           {user?.role === 'ADMIN' && (
@@ -175,56 +174,67 @@ export function Mypage() {
       </div>
 
       {/* --- 지갑 섹션 --- */}
-      <Card title="내 지갑 💳">
+      <Card title="내 자산">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div>
-            <div style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>이용 가능 잔고</div>
-            <div style={{ fontSize: '32px', fontWeight: 800, color: 'var(--primary)' }}>
-              {data.user.points.toLocaleString()} <span style={{ fontSize: '20px' }}>P</span>
+          <div style={{ margin: '8px 0 16px 0' }}>
+            <div className="toss-caption" style={{ marginBottom: '4px' }}>이용 가능 잔고</div>
+            <div className="toss-amount-display" style={{ color: 'var(--primary)' }}>
+              {data.user.points.toLocaleString()} <span className="currency-label">P</span>
             </div>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <Button variant="primary" style={{ flex: 1 }} onClick={() => setActiveModal('charge')}>포인트 충전/쿠폰</Button>
-            <Button variant="secondary" style={{ flex: 1 }} onClick={() => setActiveModal('gift')}>선물하기</Button>
+            <Button variant="primary" style={{ flex: 1 }} onClick={() => setActiveModal('charge')}>채우기</Button>
+            <Button variant="secondary" style={{ flex: 1 }} onClick={() => setActiveModal('gift')}>보내기</Button>
           </div>
         </div>
 
-        <div style={{ marginTop: '24px', borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
-          <h4 style={{ margin: '0 0 12px 0', color: 'var(--text-secondary)' }}>최근 사용 내역</h4>
+        <div style={{ marginTop: '32px', borderTop: '1px solid var(--border-color)', paddingTop: '24px' }}>
+          <h4 className="toss-subheading" style={{ margin: '0 0 16px 0' }}>최근 사용 내역</h4>
           <div style={{ maxHeight: '240px', overflowY: 'auto' }}>
-            {data.transactions.length === 0 ? <p style={{ color: 'var(--text-secondary)' }}>내역이 없습니다.</p> :
+            {data.transactions.length === 0 ? (
+              <div style={{ padding: '24px 0', textAlign: 'center' }}>
+                <p className="toss-body" style={{ margin: '0 0 16px 0' }}>아직 소비 내역이 없어요.</p>
+                <Button variant="secondary" size="sm" onClick={() => setActiveModal('charge')}>포인트 채우기</Button>
+              </div>
+            ) : (
               data.transactions.map(tx => (
-                <div key={tx.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--glass-border)' }}>
+                <div key={tx.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 0', borderBottom: '1px solid var(--border-color)' }}>
                   <div>
-                    <div style={{ fontWeight: 600 }}>{tx.reason === 'CHARGE' ? '포인트 충전' : tx.reason === 'DEPOSIT' ? '입찰 참여' : tx.reason === 'REFUND' ? '입찰 환불' : '결제 완료'}</div>
-                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{new Date(tx.createdAt).toLocaleString()}</div>
+                    <div className="toss-subheading">{tx.reason === 'CHARGE' ? '포인트 충전' : tx.reason === 'DEPOSIT' ? '입찰 참여' : tx.reason === 'REFUND' ? '입찰 환불' : '결제 완료'}</div>
+                    <div className="toss-caption" style={{ marginTop: '2px' }}>{new Date(tx.createdAt).toLocaleString()}</div>
                   </div>
-                  <div style={{ fontWeight: 700, color: tx.amount > 0 ? 'var(--success)' : 'var(--text-primary)' }}>
-                    {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()} P
+                  <div className="toss-amount" style={{ fontSize: '15px', color: tx.amount > 0 ? 'var(--success)' : 'var(--text-primary)' }}>
+                    {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()} <span className="currency-label">P</span>
                   </div>
                 </div>
-              ))}
+              ))
+            )}
           </div>
         </div>
       </Card>
 
       {/* --- 낙찰 내역 섹션 --- */}
-      <Card title="나의 경매 낙찰 내역 🎉">
+      <Card title="나의 경매 낙찰 내역">
         {data.wonItems.length === 0 ? (
-          <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '40px 0' }}>물건이 없습니다.</p>
+          <div style={{ padding: '40px 0', textAlign: 'center' }}>
+            <p className="toss-body" style={{ margin: '0 0 16px 0' }}>아직 낙찰받은 물품이 없어요.</p>
+            <Button variant="secondary" size="sm" onClick={() => navigate('/')}>입찰하러 가기</Button>
+          </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {data.wonItems.map(item => (
-              <div key={item.id} style={{ display: 'flex', gap: '16px', background: 'var(--glass-bg)', padding: '12px', borderRadius: 'var(--border-radius-md)', border: '1px solid var(--glass-border)' }}>
+              <div key={item.id} style={{ display: 'flex', gap: '16px', background: 'var(--toss-grey50)', padding: '16px', borderRadius: 'var(--radius-standard)', border: `1px solid var(--border-color)` }}>
                 {item.imageUrl ? (
-                  <img src={item.imageUrl} alt={item.name} style={{ width: '80px', height: '80px', borderRadius: '12px', objectFit: 'cover' }} />
+                  <img src={item.imageUrl} alt={item.name} style={{ width: '80px', height: '80px', borderRadius: 'var(--radius-compact)', objectFit: 'cover' }} />
                 ) : (
-                  <div style={{ width: '80px', height: '80px', borderRadius: '12px', background: '#2C2C2E', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px' }}>📦</div>
+                  <div style={{ width: '80px', height: '80px', borderRadius: 'var(--radius-compact)', background: 'var(--toss-grey200)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--toss-grey500)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                  </div>
                 )}
                 <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{item.room.title}</div>
-                  <div style={{ fontWeight: 700, fontSize: '16px' }}>{item.name}</div>
-                  <div style={{ color: 'var(--primary)', fontWeight: 800, marginTop: '4px' }}>결제가: {item.finalPrice.toLocaleString()} P</div>
+                  <div className="toss-caption">{item.room.title}</div>
+                  <div className="toss-subheading" style={{ marginTop: '2px' }}>{item.name}</div>
+                  <div className="toss-amount" style={{ color: 'var(--primary)', marginTop: '8px', fontSize: '15px' }}>결제가 {item.finalPrice.toLocaleString()}<span className="currency-label">P</span></div>
                 </div>
               </div>
             ))}
@@ -292,25 +302,25 @@ export function Mypage() {
             {/* 선물하기 */}
             {activeModal === 'gift' && (
               <form onSubmit={handleGift} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <Input label="선물 할 계정(이메일)" value={giftTarget} onChange={e => setGiftTarget(e.target.value)} placeholder="받는 사람 이메일" />
-                <Input label="금액" type="number" value={giftAmount} onChange={e => setGiftAmount(e.target.value)} placeholder="보낼 금액 입력" />
-                <Button variant="primary" type="submit">선물 쏘기 💸</Button>
+                <Input label="받을 분의 이메일" value={giftTarget} onChange={e => setGiftTarget(e.target.value)} placeholder="Email" />
+                <Input label="보낼 금액" type="number" value={giftAmount} onChange={e => setGiftAmount(e.target.value)} placeholder="금액 입력" />
+                <Button variant="primary" type="submit" size="lg">보내기</Button>
               </form>
             )}
 
-            {/* 포인트 충전 */}
+            {/* 포인트 채우기 */}
             {activeModal === 'charge' && (
               <form onSubmit={handleChargeSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {!showQR ? (
                   <>
-                    <Input label="쿠폰 코드 입력" value={couponCode} onChange={e => setCouponCode(e.target.value)} placeholder="BIDCHAL-100 등" />
-                    <Button variant="primary" type="submit" disabled={!couponCode}>쿠폰 코드 사용</Button>
+                    <Input label="쿠폰 코드" value={couponCode} onChange={e => setCouponCode(e.target.value)} placeholder="BIDCHAL-100 등 입력" />
+                    <Button variant="primary" type="submit" disabled={!couponCode} size="lg">쿠폰으로 채우기</Button>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '4px 0' }}>
                       <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }} />
                       <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>또는</span>
                       <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }} />
                     </div>
-                    <Button variant="secondary" type="button" onClick={() => setShowQR(true)}>📷 QR코드로 스캔하여 충전하기</Button>
+                    <Button variant="secondary" type="button" onClick={() => setShowQR(true)} size="lg">QR코드 스캔하기</Button>
                   </>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>

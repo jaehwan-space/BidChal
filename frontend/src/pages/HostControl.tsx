@@ -211,11 +211,11 @@ export function HostControl() {
           <Button variant="primary" onClick={handleStartAuction}
             disabled={!isConnected || (room.items?.length || 0) === 0}
             style={{ width: '100%', padding: '16px', fontSize: '18px' }}>
-            🎬 경매 시작!
+            경매 시작
           </Button>
           <Button variant="secondary" onClick={() => navigate(`/room/${roomId}/settings`)}
             style={{ width: '100%', marginTop: '12px' }}>
-            ⚙️ 아이템 추가 등록하기
+            아이템 추가 등록하기
           </Button>
         </Card>
       )}
@@ -248,7 +248,7 @@ export function HostControl() {
               {lastBidderName && (
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: 'var(--text-secondary)' }}>최고 입찰자</span>
-                  <span style={{ fontWeight: 600, color: 'var(--primary)' }}>🏷️ {lastBidderName}</span>
+                  <span style={{ fontWeight: 600, color: 'var(--primary)' }}>{lastBidderName}</span>
                 </div>
               )}
               <div style={{
@@ -256,7 +256,7 @@ export function HostControl() {
                 padding: '16px', fontSize: '32px', fontWeight: 800,
                 color: remainingTime <= 5 ? 'var(--danger)' : remainingTime <= 10 ? 'var(--primary)' : 'var(--success)',
               }}>
-                ⏱️ {remainingTime}초
+                {remainingTime}초
               </div>
             </div>
           </Card>
@@ -273,10 +273,10 @@ export function HostControl() {
 
           <div style={{ display: 'flex', gap: '8px' }}>
             <Button variant="secondary" onClick={togglePause} style={{ flex: 1, padding: '14px', background: isPaused ? 'var(--success)' : undefined }}>
-              {isPaused ? '▶️ 타이머 재개' : '⏸️ 타이머 일시정지'}
+              {isPaused ? '타이머 재개' : '타이머 일시정지'}
             </Button>
             <Button variant="secondary" onClick={handleResetItem} style={{ flex: 1, padding: '14px', background: 'var(--danger)', color: 'white' }}>
-              🔄 이 경매 초기화
+              이 경매 초기화
             </Button>
           </div>
         </>
@@ -284,19 +284,19 @@ export function HostControl() {
 
       {/* 낙찰/유찰 후 */}
       {(phase === 'sold' || phase === 'passed') && (
-        <Card title={phase === 'sold' ? '🎉 낙찰 완료!' : '😔 유찰'}>
-          <Button variant="primary" onClick={handleNextItem}
-            style={{ width: '100%', padding: '16px', fontSize: '18px', marginTop: '12px' }}>
-            ⏭️ 다음 아이템으로
+        <Card title={phase === 'sold' ? '낙찰 완료!' : '유찰'}>
+          <Button variant="primary" onClick={handleNextItem} size="lg"
+            style={{ marginTop: '12px' }}>
+            다음 아이템 진행하기
           </Button>
         </Card>
       )}
 
       {/* 경매 종료 */}
       {phase === 'ended' && (
-        <Card title="🏁 경매 종료">
-          <p style={{ color: 'var(--text-secondary)', margin: '0 0 16px 0' }}>모든 아이템의 경매가 완료되었습니다.</p>
-          <Button variant="secondary" onClick={() => navigate('/')} style={{ width: '100%' }}>
+        <Card title="경매 종료">
+          <p className="toss-body" style={{ margin: '0 0 16px 0' }}>모든 아이템의 경매가 완료되었습니다.</p>
+          <Button variant="secondary" onClick={() => navigate('/')} size="lg">
             로비로 돌아가기
           </Button>
         </Card>

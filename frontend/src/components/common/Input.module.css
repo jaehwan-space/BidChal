@@ -15,25 +15,25 @@
   width: 100%;
   padding: 0 16px;
   min-height: 48px;
-  font-size: 15px;
-  border-radius: var(--border-radius-md);
+  font-size: 16px;
+  border-radius: var(--radius-standard);
   border: 1px solid var(--border-color);
-  background-color: var(--glass-bg);
+  background-color: var(--toss-grey100);
   color: var(--text-primary);
   font-family: inherit;
-  transition: all var(--transition-fast);
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
   box-sizing: border-box;
 }
 
 .input:focus {
   outline: none;
-  border-color: var(--primary);
+  border: 2px solid var(--primary);
   background-color: var(--panel-bg);
-  box-shadow: 0 4px 12px rgba(255, 111, 0, 0.1), 0 0 0 3px rgba(255, 111, 0, 0.15);
+  padding: 0 15px; /* Offset the 1px border width increment */
 }
 
 .input::placeholder {
-  color: var(--text-secondary);
+  color: var(--text-placeholder);
 }
 
 .error {
@@ -42,8 +42,8 @@
 
 .error:focus {
   outline: none;
-  border-color: var(--danger);
-  box-shadow: 0 0 0 2px rgba(240, 68, 82, 0.2);
+  border: 2px solid var(--danger);
+  padding: 0 15px;
 }
 
 .errorMessage {
