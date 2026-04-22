@@ -168,6 +168,16 @@ export function setupSockets(io: Server) {
             data: { itemId, userId, amount }
           });
 
+          // 5. 입찰 활동 로그
+          const itemInfo = await tx.item.findUnique({ where: { id: itemId }, select: { name: true, room: { select: { title: true } } } });
+          await tx.userActivityLog.create({
+            data: {
+              userId,
+              action: 'BID',
+              details: `[${itemInfo?.room?.title}] 방 - "${itemInfo?.name}" 아이템에 ${amount.toLocaleString()}P 입찰`
+            }
+          });
+
           return updatedUser;
         });
 

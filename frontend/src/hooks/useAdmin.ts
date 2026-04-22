@@ -11,11 +11,19 @@ const getAuthHeaders = () => {
   };
 };
 
-export function useAdminUsers() {
+// ── Users ──
+
+export function useAdminUsers(filters?: { q?: string; status?: string; role?: string }) {
+  const { q, status, role } = filters || {};
   return useQuery({
-    queryKey: ['admin_users'],
+    queryKey: ['admin_users', q, status, role],
     queryFn: async () => {
-      const res = await fetch(`${API_URL}/admin/users`, { headers: getAuthHeaders() });
+      const params = new URLSearchParams();
+      if (q) params.set('q', q);
+      if (status && status !== 'ALL') params.set('status', status);
+      if (role && role !== 'ALL') params.set('role', role);
+
+      const res = await fetch(`${API_URL}/admin/users?${params.toString()}`, { headers: getAuthHeaders() });
       if (!res.ok) throw new Error('유저 목록을 불러오지 못했습니다.');
       return res.json();
     },
@@ -54,6 +62,29 @@ export function useUpdateUserStatus() {
   });
 }
 
+export function useBatchChargePoints() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ userIds, amount }: { userIds: string[]; amount: number }) => {
+      const res = await fetch(`${API_URL}/admin/users/batch-charge`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ userIds, amount })
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error || '일괄 포인트 지급 실패');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin_users'] });
+    }
+  });
+}
+
+// ── Rooms ──
+
 export function useAdminRooms() {
   return useQuery({
     queryKey: ['admin_rooms'],
@@ -83,6 +114,8 @@ export function useDeleteRoom() {
   });
 }
 
+// ── Coupons ──
+
 export function useAdminCoupons() {
   return useQuery({
     queryKey: ['admin_coupons'],
@@ -105,7 +138,7 @@ export function useCreateCoupons() {
         body: JSON.stringify(data)
       });
       if (!res.ok) {
-        const d = await res.json().catch(()=>({}));
+        const d = await res.json().catch(() => ({}));
         throw new Error(d.error || '쿠폰 발행 실패');
       }
       return res.json();
@@ -125,7 +158,7 @@ export function useDeleteCoupon() {
         headers: getAuthHeaders(),
       });
       if (!res.ok) {
-        const d = await res.json().catch(()=>({}));
+        const d = await res.json().catch(() => ({}));
         throw new Error(d.error || '쿠폰 삭제 실패');
       }
       return res.json();

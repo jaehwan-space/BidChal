@@ -35,10 +35,27 @@ const authorizeAdmin = async (req: any, res: Response, next: NextFunction) => {
 // User Management
 // ------------------------------------
 
-// 1. 유저 전체 목록 조회
+// 1. 유저 전체 목록 조회 (검색 및 필터링)
 router.get('/users', authorizeAdmin, async (req, res) => {
   try {
+    const { q, status, role } = req.query as { q?: string; status?: string; role?: string };
+    
+    const whereClause: any = {};
+    if (q) {
+      whereClause.OR = [
+        { username: { contains: q, mode: 'insensitive' } },
+        { email: { contains: q, mode: 'insensitive' } }
+      ];
+    }
+    if (status && status !== 'ALL') {
+      whereClause.status = status;
+    }
+    if (role && role !== 'ALL') {
+      whereClause.role = role;
+    }
+
     const users = await prisma.user.findMany({
+      where: whereClause,
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
@@ -57,16 +74,60 @@ router.get('/users', authorizeAdmin, async (req, res) => {
   }
 });
 
-// 2. 유저 상세 활동 내역 (포인트 이력)
+// 1-1. 일괄 포인트 지급 (신규)
+router.post('/users/batch-charge', authorizeAdmin, async (req, res) => {
+  try {
+    const { userIds, amount } = req.body as { userIds: string[]; amount: number };
+    
+    if (!userIds || userIds.length === 0 || !amount || amount <= 0) {
+      return res.status(400).json({ error: '올바른 유저 목록과 지급 포인트를 입력하세요.' });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      // 1. 선택된 각 유저 정보 가져오기 및 포인트 증가, 거래 로그 작성
+      for (const uid of userIds) {
+        await tx.user.update({
+          where: { id: uid },
+          data: { points: { increment: amount } }
+        });
+
+        // 2. PointTransaction 기록
+        await tx.pointTransaction.create({
+          data: {
+            userId: uid,
+            amount: amount,
+            reason: 'CHARGE'
+          }
+        });
+
+        // 3. UserActivityLog 상세 기록
+        await tx.userActivityLog.create({
+          data: {
+            userId: uid,
+            action: 'ADMIN_CHARGE',
+            details: `관리자에 의해 ${amount.toLocaleString()}P 일괄 지급됨`
+          }
+        });
+      }
+    });
+
+    res.json({ success: true, count: userIds.length });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to batch charge' });
+  }
+});
+
+// 2. 유저 상세 활동 내역 (통합 세분화 로그)
 router.get('/users/:id/logs', authorizeAdmin, async (req, res) => {
   try {
     const { id } = req.params;
-    const transactions = await prisma.pointTransaction.findMany({
+    const logs = await prisma.userActivityLog.findMany({
       where: { userId: id },
       orderBy: { createdAt: 'desc' },
-      take: 100 // 최근 100건만 조회
+      take: 200 // 최근 200건
     });
-    res.json(transactions);
+    res.json(logs);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to fetch logs' });
@@ -84,10 +145,22 @@ router.put('/users/:id/status', authorizeAdmin, async (req, res) => {
       return res.status(400).json({ error: '자신의 상태는 변경할 수 없습니다.' });
     }
 
-    const updatedUser = await prisma.user.update({
-      where: { id },
-      data: { status }
+    const updatedUser = await prisma.$transaction(async (tx) => {
+      const u = await tx.user.update({
+        where: { id },
+        data: { status }
+      });
+
+      await tx.userActivityLog.create({
+        data: {
+          userId: id,
+          action: 'STATUS_CHANGE',
+          details: `계정 상태가 [${status}](으)로 변경됨`
+        }
+      });
+      return u;
     });
+
     res.json(updatedUser);
   } catch (error) {
     console.error(error);

@@ -63,12 +63,31 @@ router.post('/login', async (req, res) => {
     }
 
     const token = jwt.sign(
-      { userId: user.id, username: user.username, role: user.role, status: user.status },
+      { userId: user.id, email: user.email, role: user.role, status: user.status },
       JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: '24h' }
     );
 
-    res.json({ token, user: { id: user.id, email: user.email, username: user.username, points: user.points, role: user.role } });
+    // 로그인 로그 기록
+    await prisma.userActivityLog.create({
+      data: {
+        userId: user.id,
+        action: 'LOGIN',
+        details: `${new Date().toLocaleString()} 에 로그인 성공`
+      }
+    });
+
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        points: user.points,
+        role: user.role,
+        status: user.status
+      }
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Login failed' });

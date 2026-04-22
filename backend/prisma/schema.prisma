@@ -71,6 +71,7 @@ model User {
   bids      Bid[]
   transactions PointTransaction[]
   coupons   Coupon[] @relation("UsedCoupons")
+  activityLogs UserActivityLog[] @relation("UserLogs")
 }
 
 model Room {
@@ -141,4 +142,14 @@ model Coupon {
   createdAt    DateTime @default(now())
 
   usedBy       User?    @relation("UsedCoupons", fields: [usedById], references: [id])
+}
+
+model UserActivityLog {
+  id        String   @id @default(uuid())
+  userId    String
+  action    String   // "LOGIN", "BID", "GIFT_SEND", "GIFT_RECEIVE", "STATUS_CHANGE", "ADMIN_CHARGE", "COUPON"
+  details   String   // Human readable details
+  createdAt DateTime @default(now())
+
+  user      User     @relation("UserLogs", fields: [userId], references: [id])
 }

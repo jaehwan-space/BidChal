@@ -151,6 +151,14 @@ router.post('/gift', authenticate, async (req: any, res) => {
 
       await tx.pointTransaction.create({ data: { userId: senderId, amount: -amount, reason: 'CHARGE' } }); // using CHARGE enum as general ledger for now
       await tx.pointTransaction.create({ data: { userId: receiver.id, amount: amount, reason: 'CHARGE' } });
+
+      // 송신자/수신자 액티비티 로그 작성
+      await tx.userActivityLog.create({
+        data: { userId: senderId, action: 'GIFT_SEND', details: `[${receiver.email}] 님에게 ${amount.toLocaleString()}P 선물함` }
+      });
+      await tx.userActivityLog.create({
+        data: { userId: receiver.id, action: 'GIFT_RECEIVE', details: `[${sender.email}] 님으로부터 ${amount.toLocaleString()}P 선물받음` }
+      });
     });
 
     // Re-fetch user
@@ -202,6 +210,15 @@ router.post('/coupon', authenticate, async (req: any, res) => {
       // 4. 충전 내역 남기기
       await tx.pointTransaction.create({
         data: { userId, amount: coupon.rewardAmount, reason: 'CHARGE' },
+      });
+
+      // 5. 쿠폰 활동 로그
+      await tx.userActivityLog.create({
+        data: {
+          userId,
+          action: 'COUPON',
+          details: `쿠폰 [${cleanCode}] 사용 → ${coupon.rewardAmount.toLocaleString()}P 충전`
+        }
       });
 
       // 응답에 사용할 리워드 양을 user 객체에 심어 반환

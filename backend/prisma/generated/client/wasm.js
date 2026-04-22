@@ -189,6 +189,14 @@ exports.Prisma.CouponScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.UserActivityLogScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  action: 'action',
+  details: 'details',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -245,7 +253,8 @@ exports.Prisma.ModelName = {
   Item: 'Item',
   Bid: 'Bid',
   PointTransaction: 'PointTransaction',
-  Coupon: 'Coupon'
+  Coupon: 'Coupon',
+  UserActivityLog: 'UserActivityLog'
 };
 
 /**
